@@ -377,6 +377,18 @@ def write_flag_report(flagged: List[str], output_dir: Path, stem: str) -> Option
 @click.command(context_settings={"help_option_names": ["-h", "--help"]})
 @click.argument("pdf_files", nargs=-1, type=click.Path(exists=True, dir_okay=False))
 @click.option(
+    "--input-dir", "-i",
+    default=None,
+    type=click.Path(exists=True, file_okay=False),
+    help="Folder of PDFs to process (scanned recursively with --recursive).",
+)
+@click.option(
+    "--recursive", "-R",
+    is_flag=True,
+    default=False,
+    help="Search --input-dir recursively for PDFs.",
+)
+@click.option(
     "--output-dir", "-o",
     default="output",
     show_default=True,
@@ -426,6 +438,8 @@ def write_flag_report(flagged: List[str], output_dir: Path, stem: str) -> Option
 )
 def main(
     pdf_files,
+    input_dir,
+    recursive,
     output_dir,
     chunk_sizes,
     overlap,
@@ -438,13 +452,21 @@ def main(
     """
     Extract, clean, and chunk text from PDF files for TTS pipelines.
 
-    PDF_FILES  One or more PDF paths to process.
+    PDF_FILES  Zero or more individual PDF paths. Combine freely with --input-dir.
 
     Examples:
 
     \b
-      # Basic usage — chunk at 500, 1000, 2000, 4000 chars
-      python pdf_ocr_chunker.py book.pdf
+      # Process a whole folder of PDFs
+      python pdf_ocr_chunker.py -i ./my_pdfs
+
+    \b
+      # Recursively scan a folder tree
+      python pdf_ocr_chunker.py -i ./library -R
+
+    \b
+      # Mix a folder with extra individual files
+      python pdf_ocr_chunker.py -i ./pdfs extra.pdf -o ./out
 
     \b
       # Force OCR, custom chunk sizes, remove garbage tokens
@@ -457,9 +479,35 @@ def main(
     if verbose:
         logging.getLogger().setLevel(logging.DEBUG)
 
-    if not pdf_files:
+    # Collect PDFs from --input-dir
+    dir_files: List[Path] = []
+    if input_dir:
+        base = Path(input_dir)
+        pattern = "**/*.pdf" if recursive else "*.pdf"
+        found = sorted(base.glob(pattern))
+        # also catch uppercase .PDF
+        found += sorted(base.glob(pattern.replace(".pdf", ".PDF")))
+        dir_files = sorted(set(found))
+        if not dir_files:
+            click.echo(f"No PDF files found in: {input_dir}", err=True)
+            sys.exit(1)
+        log.info("Found %d PDF(s) in %s%s", len(dir_files), input_dir,
+                 " (recursive)" if recursive else "")
+
+    # Merge with individually-specified files (deduplicated, order preserved)
+    seen = set()
+    all_files: List[Path] = []
+    for p in list(dir_files) + [Path(f) for f in pdf_files]:
+        resolved = p.resolve()
+        if resolved not in seen:
+            seen.add(resolved)
+            all_files.append(p)
+
+    if not all_files:
         click.echo("No PDF files provided. Use -h for help.", err=True)
         sys.exit(1)
+
+    log.info("Total PDFs to process: %d", len(all_files))
 
     try:
         sizes = [int(s.strip()) for s in chunk_sizes.split(",")]
@@ -470,8 +518,7 @@ def main(
     out_dir = Path(output_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    for pdf_path_str in pdf_files:
-        pdf_path = Path(pdf_path_str)
+    for pdf_path in all_files:
         stem = pdf_path.stem
         log.info("=" * 60)
         log.info("Processing: %s", pdf_path)
