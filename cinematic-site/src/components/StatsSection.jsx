@@ -1,8 +1,8 @@
-import { motion, useInView } from "framer-motion";
+import { useInView } from "framer-motion";
 import { useRef, useEffect, useState } from "react";
 import CinematicSection from "./CinematicSection";
 
-function AnimatedCounter({ value, suffix = "", duration = 2 }) {
+function AnimatedCounter({ value, suffix = "", prefix = "", duration = 2 }) {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
   const [count, setCount] = useState(0);
@@ -24,6 +24,7 @@ function AnimatedCounter({ value, suffix = "", duration = 2 }) {
 
   return (
     <span ref={ref}>
+      {prefix}
       {count}
       {suffix}
     </span>
@@ -31,33 +32,33 @@ function AnimatedCounter({ value, suffix = "", duration = 2 }) {
 }
 
 const stats = [
-  { value: "60", suffix: "fps", label: "Smooth Animation" },
-  { value: "95", suffix: "+", label: "Performance Score" },
-  { value: "3", suffix: "s", label: "Load Time" },
-  { value: "100", suffix: "%", label: "Code-Driven" },
+  { value: "25", suffix: "+", label: "Years of Practice" },
+  { value: "10", suffix: "K+", label: "Lives Transformed" },
+  { value: "108", suffix: "", label: "Sacred Teachings" },
+  { value: "12", suffix: "", label: "Cosmic Houses" },
 ];
 
 export default function StatsSection() {
   return (
-    <section className="relative overflow-hidden border-y border-white/5 py-24">
-      {/* Background line accent */}
+    <section className="relative overflow-hidden border-y border-[#c9a23e]/10 py-24">
+      {/* Side accents */}
       <div className="pointer-events-none absolute inset-0">
-        <div className="absolute left-0 top-0 h-full w-px bg-gradient-to-b from-transparent via-[#c9a55c]/20 to-transparent" />
-        <div className="absolute right-0 top-0 h-full w-px bg-gradient-to-b from-transparent via-[#c9a55c]/20 to-transparent" />
+        <div className="absolute left-0 top-0 h-full w-px bg-gradient-to-b from-transparent via-[#c9a23e]/15 to-transparent" />
+        <div className="absolute right-0 top-0 h-full w-px bg-gradient-to-b from-transparent via-[#c9a23e]/15 to-transparent" />
       </div>
 
       <div className="mx-auto grid max-w-5xl grid-cols-2 gap-12 px-6 lg:grid-cols-4">
         {stats.map((stat, index) => (
           <CinematicSection key={stat.label} delay={index * 0.1}>
             <div className="text-center">
-              <div className="mb-2 text-4xl font-extralight tracking-tight text-white sm:text-5xl">
+              <div className="text-glow-gold mb-2 font-heading text-4xl tracking-tight text-[#c9a23e] sm:text-5xl">
                 <AnimatedCounter
                   value={stat.value}
                   suffix={stat.suffix}
                   duration={1.5}
                 />
               </div>
-              <div className="text-sm uppercase tracking-[0.2em] text-white/40">
+              <div className="font-heading text-[10px] uppercase tracking-[0.25em] text-[#e8e0d0]/30">
                 {stat.label}
               </div>
             </div>

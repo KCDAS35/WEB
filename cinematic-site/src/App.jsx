@@ -1,56 +1,67 @@
+import Navbar from "./components/Navbar";
 import HeroSection from "./components/HeroSection";
 import FeatureShowcase from "./components/FeatureShowcase";
 import ShowreelSection from "./components/ShowreelSection";
 import StatsSection from "./components/StatsSection";
 import ParallaxText from "./components/ParallaxText";
 import Footer from "./components/Footer";
+import Starfield from "./components/Starfield";
 import "./index.css";
 
 export default function App() {
   return (
-    <div className="min-h-screen bg-[#0a0a0f] text-white">
-      {/* Hero — full-screen cinematic intro */}
-      <HeroSection
-        title="CINEMATIC"
-        subtitle="A visual experience crafted in code"
-      />
+    <div className="relative min-h-screen bg-[#070b15] font-body text-[#e8e0d0]">
+      {/* Fixed starfield background */}
+      <Starfield count={180} />
 
-      {/* Parallax divider quote */}
-      <div className="py-32">
-        <ParallaxText
-          speed={0.5}
-          className="mx-auto max-w-3xl px-6 text-center"
-        >
-          <p className="text-2xl font-extralight leading-relaxed tracking-wide text-white/50 sm:text-3xl">
-            &ldquo;Where every pixel tells a story and every scroll reveals a
-            new chapter.&rdquo;
-          </p>
-        </ParallaxText>
+      {/* Navigation */}
+      <Navbar />
+
+      {/* Content layer */}
+      <div className="relative z-10">
+        {/* Hero — full-screen intro with portal */}
+        <HeroSection />
+
+        {/* Parallax wisdom quote */}
+        <div className="py-24">
+          <ParallaxText
+            speed={0.4}
+            className="mx-auto max-w-3xl px-6 text-center"
+          >
+            <p className="font-heading text-2xl font-light leading-relaxed tracking-wide text-[#e8e0d0]/30 sm:text-3xl">
+              &ldquo;The cosmos is within us. We are made of star-stuff. We are
+              a way for the universe to know itself.&rdquo;
+            </p>
+          </ParallaxText>
+        </div>
+
+        {/* Jyotish showcase */}
+        <ShowreelSection />
+
+        {/* Stats */}
+        <StatsSection />
+
+        {/* Sacred offerings / services */}
+        <FeatureShowcase />
+
+        {/* Closing mantra */}
+        <div className="py-24">
+          <ParallaxText
+            speed={0.3}
+            className="mx-auto max-w-2xl px-6 text-center"
+          >
+            <p className="text-glow-gold font-heading text-xl tracking-[0.3em] text-[#c9a23e]/30">
+              LOKAH SAMASTAH SUKHINO BHAVANTU
+            </p>
+            <p className="mt-3 font-body text-sm italic text-[#e8e0d0]/20">
+              May all beings everywhere be happy and free
+            </p>
+          </ParallaxText>
+        </div>
+
+        {/* Footer */}
+        <Footer />
       </div>
-
-      {/* Features */}
-      <FeatureShowcase />
-
-      {/* Stats */}
-      <StatsSection />
-
-      {/* Showreel */}
-      <ShowreelSection />
-
-      {/* Parallax closing */}
-      <div className="py-32">
-        <ParallaxText
-          speed={0.3}
-          className="mx-auto max-w-2xl px-6 text-center"
-        >
-          <p className="text-xl font-extralight tracking-widest text-white/30">
-            DESIGNED FOR THE SCREEN. BUILT WITH CODE.
-          </p>
-        </ParallaxText>
-      </div>
-
-      {/* Footer */}
-      <Footer />
     </div>
   );
 }
