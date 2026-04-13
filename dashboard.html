@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Client Dashboard — PlaceinTime Web Services</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #0f1117; color: #e2e8f0; min-height: 100vh; padding: 2rem 1rem; }
+
+    header { display: flex; align-items: center; justify-content: space-between; max-width: 1200px; margin: 0 auto 2rem; flex-wrap: wrap; gap: 1rem; }
+    header h1 { font-size: 1.6rem; font-weight: 800; color: #f8fafc; }
+    header p { color: #64748b; font-size: 0.85rem; margin-top: 0.2rem; }
+    .header-brand { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #7c9ef5; background: #1e2433; border: 1px solid #2d3748; padding: 0.4rem 1rem; border-radius: 999px; }
+
+    .stats { display: flex; gap: 1rem; max-width: 1200px; margin: 0 auto 2rem; flex-wrap: wrap; }
+    .stat { background: #1e2433; border: 1px solid #2d3748; border-radius: 12px; padding: 1rem 1.5rem; flex: 1; min-width: 120px; }
+    .stat-num { font-size: 2rem; font-weight: 800; color: #f1f5f9; }
+    .stat-label { font-size: 0.75rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.06em; margin-top: 0.2rem; }
+
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 1.25rem; max-width: 1200px; margin: 0 auto; }
+
+    .card { background: #1e2433; border: 1px solid #2d3748; border-radius: 14px; padding: 1.5rem; display: flex; flex-direction: column; gap: 0.9rem; }
+    .card:hover { border-color: #4f6ef744; }
+    .card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; }
+    .client-icon { width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; flex-shrink: 0; }
+    .client-name { font-size: 1rem; font-weight: 700; color: #f1f5f9; }
+    .client-type { font-size: 0.78rem; color: #64748b; margin-top: 0.15rem; }
+
+    .status-select { appearance: none; background: #111827; border: 1px solid #374151; color: #e2e8f0; border-radius: 8px; padding: 0.3rem 0.7rem; font-size: 0.78rem; cursor: pointer; font-weight: 600; }
+    .status-select.new       { border-color: #374151; color: #94a3b8; }
+    .status-select.onboarding{ border-color: #7c3aed; color: #c084fc; background: #3b1f6e22; }
+    .status-select.building  { border-color: #1d4ed8; color: #60a5fa; background: #1e3a5f22; }
+    .status-select.review    { border-color: #b45309; color: #fbbf24; background: #42200622; }
+    .status-select.live      { border-color: #166534; color: #4ade80; background: #14532d22; }
+
+    .info-row { display: flex; align-items: center; gap: 0.5rem; font-size: 0.82rem; color: #94a3b8; }
+    .info-row a { color: #60a5fa; text-decoration: none; }
+    .info-row a:hover { text-decoration: underline; }
+
+    .divider { border: none; border-top: 1px solid #2d3748; }
+
+    .notes-label { font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: #64748b; }
+    .notes { width: 100%; background: #111827; border: 1px solid #374151; border-radius: 8px; color: #e2e8f0; font-size: 0.82rem; padding: 0.6rem 0.75rem; resize: vertical; min-height: 60px; font-family: inherit; margin-top: 0.3rem; }
+    .notes:focus { outline: none; border-color: #4f6ef7; }
+
+    .card-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+    .btn { display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.4rem 0.85rem; border-radius: 7px; font-size: 0.78rem; font-weight: 600; text-decoration: none; cursor: pointer; border: none; transition: filter 0.15s; }
+    .btn:hover { filter: brightness(1.15); }
+    .btn-site   { background: #1d4ed8; color: #fff; }
+    .btn-form   { background: #374151; color: #e2e8f0; }
+    .btn-wa     { background: #25D366; color: #fff; }
+    .saved-msg  { font-size: 0.72rem; color: #4ade80; opacity: 0; transition: opacity 0.4s; }
+
+    @media(max-width: 600px) { .stats { flex-direction: column; } }
+  </style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>Client Dashboard</h1>
+    <p>PlaceinTime Web Services &mdash; 13 April 2026</p>
+  </div>
+  <span class="header-brand">Private</span>
+</header>
+
+<div class="stats">
+  <div class="stat"><div class="stat-num" id="stat-total">5</div><div class="stat-label">Total Clients</div></div>
+  <div class="stat"><div class="stat-num" id="stat-live" style="color:#4ade80">0</div><div class="stat-label">Live</div></div>
+  <div class="stat"><div class="stat-num" id="stat-building" style="color:#60a5fa">0</div><div class="stat-label">Building</div></div>
+  <div class="stat"><div class="stat-num" id="stat-new" style="color:#94a3b8">0</div><div class="stat-label">New</div></div>
+</div>
+
+<div class="grid" id="client-grid">
+
+  <!-- 1. Veto Solorzano -->
+  <div class="card" data-id="veto">
+    <div class="card-top">
+      <div style="display:flex;gap:0.75rem;align-items:flex-start">
+        <div class="client-icon" style="background:#3d2000;">🪵</div>
+        <div>
+          <div class="client-name">Veto Solorzano Perez</div>
+          <div class="client-type">Carpentry</div>
+        </div>
+      </div>
+      <select class="status-select" onchange="saveStatus('veto', this)">
+        <option value="new">New</option>
+        <option value="onboarding">Onboarding</option>
+        <option value="building">Building</option>
+        <option value="review">In Review</option>
+        <option value="live">Live</option>
+      </select>
+    </div>
+    <hr class="divider" />
+    <div class="info-row">💬 WhatsApp: <a href="https://wa.me/solorzano" target="_blank">solorzano</a></div>
+    <div class="notes-label">Notes <span class="saved-msg" id="saved-veto">Saved!</span></div>
+    <textarea class="notes" placeholder="Project notes..." onchange="saveNote('veto', this)" id="notes-veto"></textarea>
+    <div class="card-actions">
+      <a class="btn btn-site" href="sites/veto-solorzano/index.html" target="_blank">View Site</a>
+      <a class="btn btn-form" href="onboarding.html?client=veto" target="_blank">Onboarding Form</a>
+      <a class="btn btn-wa" href="https://wa.me/solorzano" target="_blank">WhatsApp</a>
+    </div>
+  </div>
+
+  <!-- 2. Nelson Caballero Dental -->
+  <div class="card" data-id="nelson">
+    <div class="card-top">
+      <div style="display:flex;gap:0.75rem;align-items:flex-start">
+        <div class="client-icon" style="background:#0c2a4a;">🦷</div>
+        <div>
+          <div class="client-name">Nelson Caballero Dental</div>
+          <div class="client-type">Dental Clinic &mdash; Lince &amp; Molina, Lima</div>
+        </div>
+      </div>
+      <select class="status-select" onchange="saveStatus('nelson', this)">
+        <option value="new">New</option>
+        <option value="onboarding">Onboarding</option>
+        <option value="building">Building</option>
+        <option value="review">In Review</option>
+        <option value="live">Live</option>
+      </select>
+    </div>
+    <hr class="divider" />
+    <div class="info-row">📞 <a href="tel:+51949269557">+51 949 269 557</a></div>
+    <div class="info-row">🕐 Lince: Lun–Jue 8:30am–9pm &nbsp;|&nbsp; Molina: Mar 9am–7pm</div>
+    <div class="notes-label">Notes <span class="saved-msg" id="saved-nelson">Saved!</span></div>
+    <textarea class="notes" placeholder="Project notes..." onchange="saveNote('nelson', this)" id="notes-nelson"></textarea>
+    <div class="card-actions">
+      <a class="btn btn-site" href="sites/nelson-caballero-dental/index.html" target="_blank">View Site</a>
+      <a class="btn btn-form" href="onboarding.html?client=nelson" target="_blank">Onboarding Form</a>
+      <a class="btn btn-wa" href="https://wa.me/51949269557" target="_blank">WhatsApp</a>
+    </div>
+  </div>
+
+  <!-- 3. Edwin Vereau -->
+  <div class="card" data-id="edwin">
+    <div class="card-top">
+      <div style="display:flex;gap:0.75rem;align-items:flex-start">
+        <div class="client-icon" style="background:#0d2f1a;">🖌️</div>
+        <div>
+          <div class="client-name">Edwin Vereau</div>
+          <div class="client-type">Painting &amp; Construction — EIRL</div>
+        </div>
+      </div>
+      <select class="status-select" onchange="saveStatus('edwin', this)">
+        <option value="new">New</option>
+        <option value="onboarding">Onboarding</option>
+        <option value="building">Building</option>
+        <option value="review">In Review</option>
+        <option value="live">Live</option>
+      </select>
+    </div>
+    <hr class="divider" />
+    <div class="info-row">📞 <a href="https://wa.me/51924497185" target="_blank">924 497 185</a></div>
+    <div class="info-row">🏢 RUC: 20611158018</div>
+    <div class="notes-label">Notes <span class="saved-msg" id="saved-edwin">Saved!</span></div>
+    <textarea class="notes" placeholder="Project notes..." onchange="saveNote('edwin', this)" id="notes-edwin"></textarea>
+    <div class="card-actions">
+      <a class="btn btn-site" href="sites/edwin-vereau/index.html" target="_blank">View Site</a>
+      <a class="btn btn-form" href="onboarding.html?client=edwin" target="_blank">Onboarding Form</a>
+      <a class="btn btn-wa" href="https://wa.me/51924497185" target="_blank">WhatsApp</a>
+    </div>
+  </div>
+
+  <!-- 4. Elsa Ma -->
+  <div class="card" data-id="elsa">
+    <div class="card-top">
+      <div style="display:flex;gap:0.75rem;align-items:flex-start">
+        <div class="client-icon" style="background:#2d1a4a;">🛍️</div>
+        <div>
+          <div class="client-name">Elsa Ma</div>
+          <div class="client-type">Shopping &amp; Retail</div>
+        </div>
+      </div>
+      <select class="status-select" onchange="saveStatus('elsa', this)">
+        <option value="new">New</option>
+        <option value="onboarding">Onboarding</option>
+        <option value="building">Building</option>
+        <option value="review">In Review</option>
+        <option value="live">Live</option>
+      </select>
+    </div>
+    <hr class="divider" />
+    <div class="info-row">📞 <a href="https://wa.me/51990247354" target="_blank">+51 990 247 354</a></div>
+    <div class="notes-label">Notes <span class="saved-msg" id="saved-elsa">Saved!</span></div>
+    <textarea class="notes" placeholder="Project notes..." onchange="saveNote('elsa', this)" id="notes-elsa"></textarea>
+    <div class="card-actions">
+      <a class="btn btn-site" href="sites/elsa-ma/index.html" target="_blank">View Site</a>
+      <a class="btn btn-form" href="onboarding.html?client=elsa" target="_blank">Onboarding Form</a>
+      <a class="btn btn-wa" href="https://wa.me/51990247354" target="_blank">WhatsApp</a>
+    </div>
+  </div>
+
+  <!-- 5. Multiservicios ORE -->
+  <div class="card" data-id="ore">
+    <div class="card-top">
+      <div style="display:flex;gap:0.75rem;align-items:flex-start">
+        <div class="client-icon" style="background:#3d1a00;">🔧</div>
+        <div>
+          <div class="client-name">Multiservicios "ORE"</div>
+          <div class="client-type">Installation &amp; Maintenance</div>
+        </div>
+      </div>
+      <select class="status-select" onchange="saveStatus('ore', this)">
+        <option value="new">New</option>
+        <option value="onboarding">Onboarding</option>
+        <option value="building">Building</option>
+        <option value="review">In Review</option>
+        <option value="live">Live</option>
+      </select>
+    </div>
+    <hr class="divider" />
+    <div class="info-row">📞 <a href="https://wa.me/51960935502" target="_blank">960 935 502</a></div>
+    <div class="notes-label">Notes <span class="saved-msg" id="saved-ore">Saved!</span></div>
+    <textarea class="notes" placeholder="Project notes..." onchange="saveNote('ore', this)" id="notes-ore"></textarea>
+    <div class="card-actions">
+      <a class="btn btn-site" href="sites/multiservicios-ore/index.html" target="_blank">View Site</a>
+      <a class="btn btn-form" href="onboarding.html?client=ore" target="_blank">Onboarding Form</a>
+      <a class="btn btn-wa" href="https://wa.me/51960935502" target="_blank">WhatsApp</a>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  const CLIENTS = ['veto','nelson','edwin','elsa','ore'];
+
+  function saveStatus(id, sel) {
+    localStorage.setItem('status_'+id, sel.value);
+    sel.className = 'status-select ' + sel.value;
+    updateStats();
+  }
+
+  function saveNote(id, ta) {
+    localStorage.setItem('note_'+id, ta.value);
+    const msg = document.getElementById('saved-'+id);
+    msg.style.opacity = '1';
+    setTimeout(() => msg.style.opacity = '0', 1500);
+  }
+
+  function updateStats() {
+    const statuses = CLIENTS.map(id => localStorage.getItem('status_'+id) || 'new');
+    document.getElementById('stat-live').textContent     = statuses.filter(s=>s==='live').length;
+    document.getElementById('stat-building').textContent = statuses.filter(s=>s==='building'||s==='review').length;
+    document.getElementById('stat-new').textContent      = statuses.filter(s=>s==='new'||s==='onboarding').length;
+  }
+
+  // Load saved state on page load
+  CLIENTS.forEach(id => {
+    const status = localStorage.getItem('status_'+id) || 'new';
+    const note   = localStorage.getItem('note_'+id) || '';
+    const sel    = document.querySelector(`[data-id="${id}"] .status-select`);
+    const ta     = document.getElementById('notes-'+id);
+    if (sel) { sel.value = status; sel.className = 'status-select ' + status; }
+    if (ta)  { ta.value = note; }
+  });
+
+  updateStats();
+</script>
+</body>
+</html>

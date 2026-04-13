@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Multiservicios ORE — Instalación y Mantenimiento, Lima</title>
+  <meta name="description" content="Multiservicios ORE. Drywall, gasfitería, electricidad, pintura, carpintería, pisos y más. Lima. Tel: 960935502." />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root { --orange: #F97316; --amber: #F59E0B; --dark: #1A0800; --mid: #3D1A00; --gray: #7A5A40; --light: #FFF7F0; }
+    html { scroll-behavior: smooth; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--light); color: var(--dark); }
+
+    nav { position: sticky; top: 0; z-index: 100; background: var(--dark); display: flex; align-items: center; justify-content: space-between; padding: 0.85rem 1.5rem; }
+    nav .logo { display: flex; align-items: center; gap: 0.6rem; }
+    nav .logo .ore { font-size: 1.3rem; font-weight: 900; color: var(--orange); }
+    nav .logo .full { font-size: 0.75rem; color: rgba(255,255,255,0.6); }
+    .nav-cta { background: var(--orange); color: #fff; padding: 0.45rem 1.1rem; border-radius: 999px; font-size: 0.82rem; font-weight: 700; text-decoration: none; }
+
+    .hero { background: linear-gradient(140deg, var(--dark) 0%, var(--mid) 55%, #7c2d00 100%); min-height: 88vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 5rem 1.5rem 4rem; position: relative; overflow: hidden; }
+    .hero::before { content: ''; position: absolute; inset: 0; background: repeating-linear-gradient(45deg, transparent, transparent 40px, rgba(255,255,255,0.015) 40px, rgba(255,255,255,0.015) 80px); }
+    .hero::after { content: ''; position: absolute; bottom: -2px; left: 0; right: 0; height: 60px; background: var(--light); clip-path: ellipse(55% 100% at 50% 100%); }
+    .hero-tag { display: inline-block; background: var(--orange); color: #fff; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.12em; padding: 0.3rem 1rem; border-radius: 999px; margin-bottom: 1.5rem; }
+    .hero h1 { font-size: clamp(2.2rem, 6vw, 3.8rem); font-weight: 900; color: #fff; line-height: 1.05; margin-bottom: 0.5rem; }
+    .hero h1 em { color: var(--orange); font-style: normal; }
+    .hero .tagline { font-size: 1rem; color: var(--orange); font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1.2rem; }
+    .hero p { font-size: 1.05rem; color: #d4a888; max-width: 500px; line-height: 1.65; margin: 0 auto 2rem; }
+    .btn-primary { display: inline-flex; align-items: center; gap: 0.5rem; background: #25D366; color: #fff; padding: 0.85rem 1.8rem; border-radius: 999px; font-size: 1rem; font-weight: 700; text-decoration: none; box-shadow: 0 4px 20px #25D36644; transition: transform 0.15s, filter 0.15s; }
+    .btn-primary:hover { transform: translateY(-2px); filter: brightness(1.1); }
+    .btn-call { display: inline-flex; align-items: center; gap: 0.5rem; background: var(--orange); color: #fff; padding: 0.85rem 1.8rem; border-radius: 999px; font-size: 1rem; font-weight: 700; text-decoration: none; transition: transform 0.15s, filter 0.15s; }
+    .btn-call:hover { transform: translateY(-2px); filter: brightness(1.1); }
+    .hero-btns { display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; }
+
+    .trust { background: var(--orange); padding: 1rem 1.5rem; display: flex; justify-content: center; gap: 2.5rem; flex-wrap: wrap; }
+    .trust-item { color: rgba(255,255,255,0.95); font-size: 0.82rem; font-weight: 600; display: flex; align-items: center; gap: 0.4rem; }
+
+    .services { padding: 5rem 1.5rem; max-width: 1100px; margin: 0 auto; }
+    .section-label { font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.12em; color: var(--orange); margin-bottom: 0.5rem; }
+    .section-title { font-size: clamp(1.5rem, 4vw, 2rem); font-weight: 800; color: var(--dark); margin-bottom: 0.75rem; }
+    .section-sub { color: var(--gray); font-size: 0.95rem; line-height: 1.65; max-width: 540px; margin-bottom: 2.5rem; }
+    .services-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(175px, 1fr)); gap: 1rem; }
+    .service-card { background: #fff; border: 1px solid #ffe0c8; border-radius: 14px; padding: 1.4rem 1.1rem; text-align: center; transition: box-shadow 0.2s, transform 0.2s; }
+    .service-card:hover { box-shadow: 0 6px 24px #f9731622; transform: translateY(-3px); }
+    .service-icon { font-size: 1.9rem; margin-bottom: 0.6rem; }
+    .service-name { font-size: 0.82rem; font-weight: 700; color: var(--dark); line-height: 1.3; }
+
+    .highlight { background: var(--dark); padding: 4rem 1.5rem; }
+    .highlight-inner { max-width: 900px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1.5rem; align-items: center; }
+    .highlight-text h2 { font-size: 1.6rem; font-weight: 800; color: #fff; margin-bottom: 0.75rem; }
+    .highlight-text p { color: #d4a888; font-size: 0.95rem; line-height: 1.65; }
+    .highlight-list { list-style: none; display: flex; flex-direction: column; gap: 0.6rem; }
+    .highlight-list li { display: flex; align-items: center; gap: 0.6rem; font-size: 0.88rem; color: #fff; }
+    .highlight-list li::before { content: '✓'; color: var(--orange); font-weight: 900; flex-shrink: 0; }
+
+    .cta { padding: 5rem 1.5rem; text-align: center; background: linear-gradient(135deg, #fff0e5, var(--light)); }
+    .cta h2 { font-size: clamp(1.4rem, 4vw, 1.9rem); font-weight: 800; color: var(--dark); margin-bottom: 0.75rem; }
+    .cta p { color: var(--gray); margin-bottom: 2rem; }
+    .cta .phone-big { font-size: 1.4rem; font-weight: 900; color: var(--orange); margin-bottom: 1.5rem; }
+
+    footer { background: var(--dark); color: #d4a888; padding: 2rem 1.5rem; text-align: center; font-size: 0.82rem; }
+    footer a { color: var(--orange); text-decoration: none; }
+    .footer-brand { font-size: 0.7rem; color: #7a5a40; margin-top: 0.5rem; }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">
+    <div>
+      <div class="ore">ORE</div>
+      <div class="full">Multiservicios</div>
+    </div>
+  </div>
+  <a class="nav-cta" href="https://wa.me/51960935502" target="_blank">Llamar ahora</a>
+</nav>
+
+<section class="hero">
+  <span class="hero-tag">Instalación y Mantenimiento — Lima, Perú</span>
+  <h1>Multiservicios<br><em>ORE</em></h1>
+  <div class="tagline">Responsabilidad y Puntualidad</div>
+  <p>Tu empresa de confianza para todo tipo de trabajo en el hogar o empresa. Gasfitería, electricidad, drywall, pintura, carpintería y mucho más.</p>
+  <div class="hero-btns">
+    <a class="btn-primary" href="https://wa.me/51960935502?text=Hola%2C%20necesito%20un%20servicio%20de%20ORE" target="_blank">💬 WhatsApp</a>
+    <a class="btn-call" href="tel:+51960935502">📞 960 935 502</a>
+  </div>
+</section>
+
+<div class="trust">
+  <div class="trust-item">🏆 Responsabilidad garantizada</div>
+  <div class="trust-item">⏰ Puntualidad en todo trabajo</div>
+  <div class="trust-item">🔧 Múltiples especialidades</div>
+  <div class="trust-item">📍 Lima y alrededores</div>
+</div>
+
+<section class="services" id="servicios">
+  <div class="section-label">Nuestros Servicios</div>
+  <div class="section-title">Todo para tu hogar o empresa</div>
+  <p class="section-sub">Somos tu empresa de mantenimiento integral. Resolvemos cualquier trabajo con profesionalismo y garantía.</p>
+  <div class="services-grid">
+    <div class="service-card"><div class="service-icon">🧱</div><div class="service-name">Drywall en General</div></div>
+    <div class="service-card"><div class="service-icon">🔧</div><div class="service-name">Gasfitería General</div></div>
+    <div class="service-card"><div class="service-icon">⚡</div><div class="service-name">Electricidad</div></div>
+    <div class="service-card"><div class="service-icon">☀️</div><div class="service-name">Techo Sol, Sombra y Policarbonato</div></div>
+    <div class="service-card"><div class="service-icon">🖌️</div><div class="service-name">Pintura en General</div></div>
+    <div class="service-card"><div class="service-icon">🪟</div><div class="service-name">Enchapes</div></div>
+    <div class="service-card"><div class="service-icon">⬜</div><div class="service-name">Mayólicas y Porcelanato</div></div>
+    <div class="service-card"><div class="service-icon">🚪</div><div class="service-name">Carpintería en Melanina y Madera</div></div>
+    <div class="service-card"><div class="service-icon">🏠</div><div class="service-name">Pisos Laminados</div></div>
+    <div class="service-card"><div class="service-icon">🧱</div><div class="service-name">Albañilería en General</div></div>
+    <div class="service-card"><div class="service-icon">📺</div><div class="service-name">Armado de Muebles de Centro de Entretenimiento</div></div>
+    <div class="service-card"><div class="service-icon">🔑</div><div class="service-name">Reparación de Chapas</div></div>
+    <div class="service-card"><div class="service-icon">🗝️</div><div class="service-name">Duplicado de Llaves</div></div>
+  </div>
+</section>
+
+<section class="highlight">
+  <div class="highlight-inner">
+    <div class="highlight-text">
+      <h2>¿Por qué elegir ORE?</h2>
+      <p>Somos una empresa que cumple lo que promete. Cada trabajo lo hacemos con dedicación, limpieza y responsabilidad.</p>
+    </div>
+    <ul class="highlight-list">
+      <li>Presupuesto sin costo</li>
+      <li>Técnicos capacitados y experimentados</li>
+      <li>Materiales de primera calidad</li>
+      <li>Trabajo limpio y ordenado</li>
+      <li>Garantía en todos los servicios</li>
+      <li>Atención rápida ante emergencias</li>
+      <li>Precio justo y transparente</li>
+    </ul>
+  </div>
+</section>
+
+<section class="cta">
+  <h2>¿Necesitas un servicio ahora?</h2>
+  <p>Llámanos o escríbenos por WhatsApp — respondemos rápido.</p>
+  <div class="phone-big">📞 960 935 502</div>
+  <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;">
+    <a class="btn-primary" href="https://wa.me/51960935502?text=Hola%2C%20necesito%20un%20servicio" target="_blank">💬 WhatsApp</a>
+    <a class="btn-call" href="tel:+51960935502">📞 Llamar</a>
+  </div>
+</section>
+
+<footer>
+  <div>Multiservicios "ORE" &nbsp;|&nbsp; 📞 <a href="tel:+51960935502">960 935 502</a> &nbsp;|&nbsp; Lima, Perú</div>
+  <div style="margin-top:0.3rem;font-style:italic;color:#a07050;">Responsabilidad y Puntualidad</div>
+  <div class="footer-brand">Página web por PlaceinTime Web Services</div>
+</footer>
+
+</body>
+</html>

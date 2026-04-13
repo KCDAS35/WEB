@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Onboarding — PlaceinTime Web Services</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #0f1117; color: #e2e8f0; min-height: 100vh; padding: 2rem 1rem; }
+
+    .container { max-width: 680px; margin: 0 auto; }
+
+    header { text-align: center; margin-bottom: 2.5rem; }
+    header .brand { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #7c9ef5; margin-bottom: 0.75rem; }
+    header h1 { font-size: 1.8rem; font-weight: 800; color: #f8fafc; }
+    header p { color: #94a3b8; margin-top: 0.5rem; font-size: 0.9rem; line-height: 1.6; }
+
+    .progress { display: flex; gap: 0.4rem; margin-bottom: 2rem; }
+    .prog-step { flex: 1; height: 4px; border-radius: 999px; background: #2d3748; transition: background 0.3s; }
+    .prog-step.active { background: #4f6ef7; }
+    .prog-step.done   { background: #4ade80; }
+
+    .section { background: #1e2433; border: 1px solid #2d3748; border-radius: 14px; padding: 1.75rem; margin-bottom: 1.25rem; }
+    .section-title { font-size: 1rem; font-weight: 700; color: #f1f5f9; margin-bottom: 0.25rem; display: flex; align-items: center; gap: 0.5rem; }
+    .section-sub { font-size: 0.82rem; color: #64748b; margin-bottom: 1.25rem; }
+
+    .field { margin-bottom: 1.1rem; }
+    .field label { display: block; font-size: 0.8rem; font-weight: 600; color: #94a3b8; margin-bottom: 0.4rem; text-transform: uppercase; letter-spacing: 0.05em; }
+    .field label .req { color: #f87171; margin-left: 0.2rem; }
+    .field input, .field textarea, .field select {
+      width: 100%; background: #111827; border: 1px solid #374151; border-radius: 8px;
+      color: #e2e8f0; font-size: 0.9rem; padding: 0.65rem 0.9rem; font-family: inherit; transition: border-color 0.2s;
+    }
+    .field input:focus, .field textarea:focus, .field select:focus { outline: none; border-color: #4f6ef7; }
+    .field textarea { resize: vertical; min-height: 90px; }
+    .field select { appearance: none; cursor: pointer; }
+
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+
+    .color-row { display: flex; gap: 0.6rem; flex-wrap: wrap; }
+    .color-opt  { cursor: pointer; border: 2px solid transparent; border-radius: 8px; padding: 0.5rem 0.8rem; font-size: 0.8rem; font-weight: 600; transition: border-color 0.15s; user-select: none; }
+    .color-opt input { display: none; }
+    .color-opt:has(input:checked) { border-color: #4f6ef7; }
+
+    .checkbox-group { display: flex; flex-direction: column; gap: 0.5rem; }
+    .checkbox-item { display: flex; align-items: center; gap: 0.6rem; font-size: 0.88rem; color: #cbd5e1; cursor: pointer; }
+    .checkbox-item input { width: 16px; height: 16px; accent-color: #4f6ef7; cursor: pointer; }
+
+    .submit-btn { width: 100%; padding: 0.9rem; background: #4f6ef7; color: #fff; border: none; border-radius: 10px; font-size: 1rem; font-weight: 700; cursor: pointer; margin-top: 1rem; transition: filter 0.15s, transform 0.1s; }
+    .submit-btn:hover { filter: brightness(1.1); transform: translateY(-1px); }
+
+    .success { display: none; text-align: center; padding: 3rem 2rem; background: #1e2433; border: 1px solid #166534; border-radius: 14px; }
+    .success h2 { color: #4ade80; font-size: 1.4rem; margin-bottom: 0.5rem; }
+    .success p { color: #94a3b8; }
+
+    @media(max-width: 520px) { .field-row { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <div class="brand">PlaceinTime Web Services</div>
+    <h1>Formulario de Bienvenida</h1>
+    <p>Completa esta información para que podamos construir tu página web perfecta.<br>
+    ¡Solo toma 5 minutos!</p>
+  </header>
+
+  <div class="progress">
+    <div class="prog-step active" id="p1"></div>
+    <div class="prog-step" id="p2"></div>
+    <div class="prog-step" id="p3"></div>
+    <div class="prog-step" id="p4"></div>
+  </div>
+
+  <form id="onboarding-form" onsubmit="handleSubmit(event)">
+
+    <!-- SECTION 1: Business Info -->
+    <div class="section">
+      <div class="section-title">🏢 Tu Negocio</div>
+      <div class="section-sub">Cuéntanos sobre tu empresa</div>
+
+      <div class="field">
+        <label>Nombre del negocio <span class="req">*</span></label>
+        <input type="text" name="business_name" placeholder="Ej: Carpintería Solorzano" required />
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Tu nombre <span class="req">*</span></label>
+          <input type="text" name="owner_name" placeholder="Ej: Veto Solorzano" required />
+        </div>
+        <div class="field">
+          <label>Rubro / Categoría</label>
+          <select name="category">
+            <option value="">Selecciona...</option>
+            <option>Carpintería</option>
+            <option>Clínica / Salud</option>
+            <option>Pintura y construcción</option>
+            <option>Comercio / Retail</option>
+            <option>Instalaciones y mantenimiento</option>
+            <option>Otro</option>
+          </select>
+        </div>
+      </div>
+      <div class="field">
+        <label>Descripción del negocio <span class="req">*</span></label>
+        <textarea name="description" placeholder="¿Qué haces? ¿A quién sirves? ¿Qué te hace especial? Escríbelo con tus propias palabras." required></textarea>
+      </div>
+      <div class="field">
+        <label>¿Cuántos años llevas en el negocio?</label>
+        <input type="text" name="years" placeholder="Ej: 5 años" />
+      </div>
+    </div>
+
+    <!-- SECTION 2: Contact & Location -->
+    <div class="section">
+      <div class="section-title">📞 Contacto y Ubicación</div>
+      <div class="section-sub">¿Cómo te contactan tus clientes?</div>
+
+      <div class="field-row">
+        <div class="field">
+          <label>WhatsApp <span class="req">*</span></label>
+          <input type="tel" name="whatsapp" placeholder="+51 999 000 000" required />
+        </div>
+        <div class="field">
+          <label>Teléfono adicional</label>
+          <input type="tel" name="phone2" placeholder="+51 999 000 000" />
+        </div>
+      </div>
+      <div class="field">
+        <label>Correo electrónico</label>
+        <input type="email" name="email" placeholder="tunegocio@gmail.com" />
+      </div>
+      <div class="field">
+        <label>Dirección / Zona de atención</label>
+        <input type="text" name="address" placeholder="Ej: Lince, Lima / También atención a domicilio" />
+      </div>
+      <div class="field">
+        <label>Horario de atención</label>
+        <input type="text" name="hours" placeholder="Ej: Lun–Vie 9am–7pm / Sáb 9am–2pm" />
+      </div>
+      <div class="field">
+        <label>Facebook</label>
+        <input type="text" name="facebook" placeholder="facebook.com/tunegocio" />
+      </div>
+      <div class="field">
+        <label>Instagram</label>
+        <input type="text" name="instagram" placeholder="@tunegocio" />
+      </div>
+    </div>
+
+    <!-- SECTION 3: Services -->
+    <div class="section">
+      <div class="section-title">✅ Servicios / Productos</div>
+      <div class="section-sub">¿Qué ofreces? Lista tus principales servicios o productos.</div>
+
+      <div class="field">
+        <label>Servicio / Producto 1 <span class="req">*</span></label>
+        <input type="text" name="s1" placeholder="Ej: Muebles a medida" required />
+      </div>
+      <div class="field">
+        <label>Servicio / Producto 2</label>
+        <input type="text" name="s2" placeholder="Ej: Cocinas empotradas" />
+      </div>
+      <div class="field">
+        <label>Servicio / Producto 3</label>
+        <input type="text" name="s3" placeholder="Ej: Clósets y roperos" />
+      </div>
+      <div class="field">
+        <label>Servicio / Producto 4</label>
+        <input type="text" name="s4" placeholder="Ej: Puertas y ventanas" />
+      </div>
+      <div class="field">
+        <label>Servicio / Producto 5</label>
+        <input type="text" name="s5" placeholder="Ej: Reparaciones en madera" />
+      </div>
+      <div class="field">
+        <label>¿Hay algo más que quieras destacar?</label>
+        <textarea name="extra_services" placeholder="Otros servicios, especialidades, garantías, etc."></textarea>
+      </div>
+    </div>
+
+    <!-- SECTION 4: Design Preferences -->
+    <div class="section">
+      <div class="section-title">🎨 Diseño de tu Página</div>
+      <div class="section-sub">Elige el estilo visual que más te representa</div>
+
+      <div class="field">
+        <label>Color principal que te gusta</label>
+        <div class="color-row">
+          <label class="color-opt" style="background:#1e3a5f;color:#60a5fa;">
+            <input type="radio" name="color" value="azul"> Azul
+          </label>
+          <label class="color-opt" style="background:#3d1a00;color:#fb923c;">
+            <input type="radio" name="color" value="naranja"> Naranja
+          </label>
+          <label class="color-opt" style="background:#2d1a4a;color:#c084fc;">
+            <input type="radio" name="color" value="morado"> Morado
+          </label>
+          <label class="color-opt" style="background:#14532d;color:#4ade80;">
+            <input type="radio" name="color" value="verde"> Verde
+          </label>
+          <label class="color-opt" style="background:#3d2000;color:#fbbf24;">
+            <input type="radio" name="color" value="dorado"> Dorado
+          </label>
+          <label class="color-opt" style="background:#1a1a2e;color:#e2e8f0;">
+            <input type="radio" name="color" value="negro"> Oscuro
+          </label>
+          <label class="color-opt" style="background:#f1f5f9;color:#1e293b;">
+            <input type="radio" name="color" value="blanco"> Claro
+          </label>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Estilo de diseño</label>
+        <select name="style">
+          <option value="">Selecciona...</option>
+          <option>Moderno y minimalista</option>
+          <option>Profesional y formal</option>
+          <option>Colorido y llamativo</option>
+          <option>Elegante y sofisticado</option>
+          <option>Simple y directo</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>¿Tienes logo?</label>
+        <div class="checkbox-group">
+          <label class="checkbox-item">
+            <input type="radio" name="has_logo" value="si"> Sí, tengo logo (me lo pedirán después)
+          </label>
+          <label class="checkbox-item">
+            <input type="radio" name="has_logo" value="no"> No tengo logo todavía
+          </label>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>¿Tienes fotos de tu negocio/productos?</label>
+        <div class="checkbox-group">
+          <label class="checkbox-item">
+            <input type="radio" name="has_photos" value="si"> Sí, tengo fotos
+          </label>
+          <label class="checkbox-item">
+            <input type="radio" name="has_photos" value="no"> No tengo fotos aún
+          </label>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>¿Qué quieres que hagan los visitantes en tu página? <span class="req">*</span></label>
+        <select name="goal" required>
+          <option value="">Selecciona el objetivo principal...</option>
+          <option>Que me escriban por WhatsApp</option>
+          <option>Que me llamen por teléfono</option>
+          <option>Que visiten mi local</option>
+          <option>Que vean mis productos/servicios</option>
+          <option>Que me dejen sus datos</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>¿Algo más que quieras contarnos?</label>
+        <textarea name="comments" placeholder="Ideas, referencias de páginas que te gustan, cosas importantes que debemos saber..."></textarea>
+      </div>
+    </div>
+
+    <button type="submit" class="submit-btn">Enviar Formulario ✓</button>
+  </form>
+
+  <div class="success" id="success-msg">
+    <h2>¡Listo! ✓</h2>
+    <p>Recibimos tu información. Nos pondremos en contacto contigo pronto por WhatsApp para los siguientes pasos.</p>
+    <p style="margin-top:1rem;color:#4ade80;font-weight:600;">PlaceinTime Web Services</p>
+  </div>
+
+</div>
+<script>
+  // Pre-fill client name from URL param
+  const params = new URLSearchParams(window.location.search);
+  const clientMap = {
+    veto: 'Veto Solorzano Perez',
+    nelson: 'Nelson Caballero',
+    edwin: 'Edwin Vereau',
+    elsa: 'Elsa Ma',
+    ore: 'Multiservicios ORE'
+  };
+  const client = params.get('client');
+  if (client && clientMap[client]) {
+    const nameField = document.querySelector('[name="owner_name"]');
+    if (nameField) nameField.value = clientMap[client];
+  }
+
+  // Progress bar update
+  const sections = document.querySelectorAll('.section');
+  const progSteps = document.querySelectorAll('.prog-step');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const idx = [...sections].indexOf(entry.target);
+        progSteps.forEach((p, i) => {
+          p.className = 'prog-step' + (i < idx ? ' done' : i === idx ? ' active' : '');
+        });
+      }
+    });
+  }, { threshold: 0.5 });
+  sections.forEach(s => observer.observe(s));
+
+  function handleSubmit(e) {
+    e.preventDefault();
+    const data = Object.fromEntries(new FormData(e.target));
+    // Save to localStorage as backup
+    localStorage.setItem('onboarding_' + (client || 'unknown'), JSON.stringify(data));
+    // Build mailto
+    const body = Object.entries(data).map(([k,v]) => `${k}: ${v}`).join('\n');
+    const subject = encodeURIComponent('Onboarding: ' + (data.business_name || 'Nuevo cliente'));
+    const mailBody = encodeURIComponent(body);
+    // Show success
+    document.getElementById('onboarding-form').style.display = 'none';
+    document.getElementById('success-msg').style.display = 'block';
+    // Optional: open mailto
+    window.location.href = `mailto:?subject=${subject}&body=${mailBody}`;
+  }
+</script>
+</body>
+</html>
