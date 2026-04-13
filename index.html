@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>App Launcher</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #0f1117;
+      color: #e2e8f0;
+      min-height: 100vh;
+      padding: 2rem 1rem;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+
+    header h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      color: #f8fafc;
+    }
+
+    header p {
+      margin-top: 0.5rem;
+      color: #94a3b8;
+      font-size: 0.95rem;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 1.5rem;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: #1e2433;
+      border: 1px solid #2d3748;
+      border-radius: 14px;
+      padding: 1.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .card:hover {
+      border-color: #4f6ef7;
+      box-shadow: 0 0 0 1px #4f6ef733, 0 8px 24px #0004;
+    }
+
+    .card-icon {
+      font-size: 2.2rem;
+      line-height: 1;
+    }
+
+    .card-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #f1f5f9;
+    }
+
+    .card-subtitle {
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #64748b;
+      margin-top: -0.5rem;
+    }
+
+    .card-desc {
+      font-size: 0.9rem;
+      color: #94a3b8;
+      line-height: 1.6;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 0.2rem 0.6rem;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+    }
+
+    .badge-green  { background: #14532d44; color: #4ade80; border: 1px solid #166534; }
+    .badge-blue   { background: #1e3a5f44; color: #60a5fa; border: 1px solid #1e40af; }
+    .badge-yellow { background: #422006aa; color: #fbbf24; border: 1px solid #92400e; }
+    .badge-purple { background: #3b1f6e44; color: #c084fc; border: 1px solid #6b21a8; }
+
+    .steps {
+      list-style: none;
+      counter-reset: step;
+      display: flex;
+      flex-direction: column;
+      gap: 0.55rem;
+    }
+
+    .steps li {
+      counter-increment: step;
+      display: flex;
+      align-items: flex-start;
+      gap: 0.65rem;
+      font-size: 0.85rem;
+      color: #cbd5e1;
+      line-height: 1.5;
+    }
+
+    .steps li::before {
+      content: counter(step);
+      flex-shrink: 0;
+      width: 1.4rem;
+      height: 1.4rem;
+      background: #2d3748;
+      border: 1px solid #4f6ef744;
+      border-radius: 50%;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: #7c9ef5;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 0.1rem;
+    }
+
+    .steps code {
+      background: #111827;
+      border: 1px solid #374151;
+      border-radius: 4px;
+      padding: 0.1rem 0.4rem;
+      font-family: "Fira Code", "Cascadia Code", monospace;
+      font-size: 0.78rem;
+      color: #93c5fd;
+      word-break: break-all;
+    }
+
+    .launch-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.6rem 1.2rem;
+      border-radius: 8px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: filter 0.15s, transform 0.1s;
+      margin-top: auto;
+    }
+
+    .launch-btn:hover { filter: brightness(1.15); transform: translateY(-1px); }
+    .launch-btn:active { transform: translateY(0); }
+
+    .btn-colab  { background: #f9a825; color: #1a0a00; }
+    .btn-github { background: #24292e; color: #f0f6fc; border: 1px solid #444d56; }
+    .btn-server { background: #4f6ef7; color: #fff; }
+    .btn-docs   { background: #1d4ed8; color: #fff; }
+
+    .divider {
+      border: none;
+      border-top: 1px solid #2d3748;
+      margin: 0.25rem 0;
+    }
+
+    /* Hosting section */
+    .hosting-section {
+      max-width: 1100px;
+      margin: 3rem auto 0;
+    }
+
+    .hosting-section h2 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: #f1f5f9;
+      margin-bottom: 1rem;
+    }
+
+    .hosting-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 1rem;
+    }
+
+    .hosting-card {
+      background: #1e2433;
+      border: 1px solid #2d3748;
+      border-radius: 12px;
+      padding: 1.25rem 1.5rem;
+    }
+
+    .hosting-card h3 {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #f1f5f9;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .hosting-card ul {
+      padding-left: 1rem;
+      list-style: disc;
+      font-size: 0.83rem;
+      color: #94a3b8;
+      line-height: 1.7;
+    }
+
+    .user-range {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #64748b;
+      margin-top: 0.6rem;
+    }
+
+    .user-range span { color: #4ade80; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>App Launcher</h1>
+    <p>Your AI voice &amp; speech applications &mdash; quick-launch guide</p>
+  </header>
+
+  <div class="grid">
+
+    <!-- VibeVoice-Realtime -->
+    <div class="card">
+      <div class="card-icon">🎙️</div>
+      <div>
+        <div class="card-title">VibeVoice-Realtime</div>
+        <div class="card-subtitle">Real-time voice AI &bull; Microsoft 0.5B model</div>
+      </div>
+      <div style="display:flex;gap:0.4rem;flex-wrap:wrap;">
+        <span class="badge badge-green">GPU Required</span>
+        <span class="badge badge-blue">Google Colab</span>
+        <span class="badge badge-yellow">T4 GPU</span>
+      </div>
+      <p class="card-desc">
+        Real-time voice conversion powered by <strong>Microsoft/VibeVoice-Realtime-0.5B</strong>.
+        Runs in Google Colab with a free T4 GPU. Exposes a public URL via Cloudflare Tunnel.
+      </p>
+      <hr class="divider" />
+      <p style="font-size:0.78rem;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.06em;">How to launch</p>
+      <ol class="steps">
+        <li>Click "Open in Colab" below &rarr; the notebook opens in your browser.</li>
+        <li>Set runtime: <strong>Runtime &rarr; Change runtime type &rarr; T4 GPU</strong></li>
+        <li>Run cell 1 to verify GPU. Log in to Hugging Face when prompted.</li>
+        <li>Run the model-download cell (may take 1&ndash;2 min).</li>
+        <li>Run the server cell &mdash; a public <code>trycloudflare.com</code> URL appears. Share that link with users.</li>
+      </ol>
+      <a class="launch-btn btn-colab"
+         href="https://colab.research.google.com/github/KCDAS35/WEB/blob/main/demo/vibevoice_realtime_colab.ipynb"
+         target="_blank" rel="noopener">
+        ▶ Open in Colab
+      </a>
+    </div>
+
+    <!-- Fish-Speech -->
+    <div class="card">
+      <div class="card-icon">🐟</div>
+      <div>
+        <div class="card-title">Fish-Speech</div>
+        <div class="card-subtitle">Text-to-speech &bull; fishaudio / v2.0.0</div>
+      </div>
+      <div style="display:flex;gap:0.4rem;flex-wrap:wrap;">
+        <span class="badge badge-purple">TTS</span>
+        <span class="badge badge-blue">Self-hosted</span>
+        <span class="badge badge-green">API + WebUI</span>
+      </div>
+      <p class="card-desc">
+        High-quality, multi-language text-to-speech with voice cloning.
+        Runs locally or on any GPU server. Includes a REST API and a Gradio web UI.
+      </p>
+      <hr class="divider" />
+      <p style="font-size:0.78rem;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.06em;">How to launch</p>
+      <ol class="steps">
+        <li>Initialize submodule: <code>git submodule update --init --recursive</code></li>
+        <li>Install deps: <code>cd fish-speech &amp;&amp; pip install -e .[stable]</code></li>
+        <li>Download model weights from Hugging Face (see fish-speech README).</li>
+        <li>Start WebUI: <code>python -m tools.run_webui --listen</code></li>
+        <li>Open <code>http://localhost:7860</code> in your browser.</li>
+      </ol>
+      <a class="launch-btn btn-github"
+         href="https://github.com/fishaudio/fish-speech"
+         target="_blank" rel="noopener">
+        &#128196; Full Docs on GitHub
+      </a>
+    </div>
+
+    <!-- VibeVoice on Colab Pro / Runpod -->
+    <div class="card">
+      <div class="card-icon">☁️</div>
+      <div>
+        <div class="card-title">Host on a GPU Cloud</div>
+        <div class="card-subtitle">For 10 &ndash; 50 concurrent users</div>
+      </div>
+      <div style="display:flex;gap:0.4rem;flex-wrap:wrap;">
+        <span class="badge badge-yellow">Paid GPU</span>
+        <span class="badge badge-green">Scalable</span>
+      </div>
+      <p class="card-desc">
+        Standard VPS (CPU-only) is <strong>too slow</strong> for real-time voice AI.
+        You need a GPU instance. Options range from cheap spot GPUs to full managed servers.
+      </p>
+      <hr class="divider" />
+      <p style="font-size:0.78rem;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.06em;">Recommended platforms</p>
+      <ol class="steps">
+        <li><strong>RunPod.io</strong> &mdash; cheapest on-demand GPUs (RTX 3090 ~$0.34/hr). Deploy a pod, run your server, expose a port.</li>
+        <li><strong>Vast.ai</strong> &mdash; peer-to-peer GPU marketplace, even cheaper. Good for Fish-Speech.</li>
+        <li><strong>Lambda Labs</strong> &mdash; reliable GPU cloud, good uptime for production.</li>
+        <li><strong>Google Colab Pro+</strong> &mdash; easiest if you already use Colab. Background execution keeps sessions alive.</li>
+        <li><strong>Your VPS + queue</strong> &mdash; see the "Queue Architecture" card below.</li>
+      </ol>
+    </div>
+
+    <!-- Queue architecture card -->
+    <div class="card">
+      <div class="card-icon">⚡</div>
+      <div>
+        <div class="card-title">Queue Architecture</div>
+        <div class="card-subtitle">Serve 10&ndash;50 users from one GPU</div>
+      </div>
+      <div style="display:flex;gap:0.4rem;flex-wrap:wrap;">
+        <span class="badge badge-blue">Nginx</span>
+        <span class="badge badge-purple">Redis</span>
+        <span class="badge badge-green">Workers</span>
+      </div>
+      <p class="card-desc">
+        One GPU handles requests one at a time very fast. A request queue lets your cheap VPS
+        accept all connections while the GPU cloud does the heavy lifting.
+      </p>
+      <hr class="divider" />
+      <p style="font-size:0.78rem;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.06em;">Architecture</p>
+      <ol class="steps">
+        <li><strong>VPS (nginx)</strong> &rarr; accepts HTTP from all users, cheap ($5/mo).</li>
+        <li><strong>Redis queue</strong> on VPS &rarr; holds pending jobs.</li>
+        <li><strong>GPU worker</strong> (RunPod/Vast) &rarr; pulls from queue, runs inference, returns result.</li>
+        <li>Users get a job ID and poll for results &mdash; no dropped connections.</li>
+        <li>Add more GPU workers horizontally to scale past 50 users.</li>
+      </ol>
+      <div class="user-range">Capacity: <span>10&ndash;50 users</span> on a single GPU worker</div>
+    </div>
+
+  </div>
+
+  <!-- Hosting comparison -->
+  <section class="hosting-section">
+    <h2>Hosting at a Glance</h2>
+    <div class="hosting-grid">
+
+      <div class="hosting-card">
+        <h3>🖥️ CPU VPS Only</h3>
+        <ul>
+          <li>Works for fish-speech at low quality / slow speed</li>
+          <li>NOT suitable for real-time voice conversion</li>
+          <li>Good for: frontend, API gateway, queue server</li>
+          <li>Cost: ~$5&ndash;$20/mo</li>
+        </ul>
+        <div class="user-range">Users: <span>1&ndash;5</span> (TTS only, slow)</div>
+      </div>
+
+      <div class="hosting-card">
+        <h3>⚡ GPU Cloud (RunPod/Vast)</h3>
+        <ul>
+          <li>Full speed for both apps</li>
+          <li>Spin up/down on demand &mdash; pay per hour</li>
+          <li>RTX 3090: ~$0.30&ndash;$0.50/hr</li>
+          <li>One GPU handles ~10&ndash;20 concurrent requests with queuing</li>
+        </ul>
+        <div class="user-range">Users: <span>10&ndash;30</span> per GPU</div>
+      </div>
+
+      <div class="hosting-card">
+        <h3>🏢 Managed GPU (Lambda/AWS)</h3>
+        <ul>
+          <li>Higher reliability and uptime SLAs</li>
+          <li>Auto-scaling with load balancer</li>
+          <li>More expensive but production-ready</li>
+          <li>A10G/A100 handles heavy concurrent load</li>
+        </ul>
+        <div class="user-range">Users: <span>30&ndash;50+</span> scalable</div>
+      </div>
+
+      <div class="hosting-card">
+        <h3>🎓 Google Colab Pro+</h3>
+        <ul>
+          <li>Easiest to set up if you use Colab already</li>
+          <li>Background execution: session stays alive</li>
+          <li>Cloudflare Tunnel gives public URL for free</li>
+          <li>~$50/mo, limited to one session at a time</li>
+        </ul>
+        <div class="user-range">Users: <span>5&ndash;15</span> (single session)</div>
+      </div>
+
+    </div>
+  </section>
+
+</body>
+</html>
