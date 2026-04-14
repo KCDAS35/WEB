@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Edwin Vereau — Servicios Múltiples & Especialistas en Pintura, Lima</title>
+  <meta name="description" content="Edwin Vereau Servicios Múltiples E IRL. Especialistas en pintura, mantenimiento y construcción en Lima. RUC 20611158018. WhatsApp: 924 497 185." />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root { --blue: #1E6BB0; --yellow: #F4C430; --green: #2ECC71; --dark: #0D1B2A; --mid: #1E3A5F; --gray: #6B8CA8; --light: #F0F7FF; }
+    html { scroll-behavior: smooth; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--light); color: var(--dark); }
+
+    nav { position: sticky; top: 0; z-index: 100; background: var(--dark); display: flex; align-items: center; justify-content: space-between; padding: 0.85rem 1.5rem; }
+    nav .logo { font-size: 1rem; font-weight: 800; color: #fff; }
+    nav .logo .ev { color: var(--yellow); font-size: 1.3rem; }
+    .nav-cta { background: var(--green); color: #fff; padding: 0.45rem 1.1rem; border-radius: 999px; font-size: 0.82rem; font-weight: 700; text-decoration: none; }
+
+    .hero { background: linear-gradient(140deg, var(--dark) 0%, var(--mid) 55%, #1e5c9a 100%); min-height: 88vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 5rem 1.5rem 4rem; position: relative; overflow: hidden; }
+    .hero::after { content: ''; position: absolute; bottom: -2px; left: 0; right: 0; height: 60px; background: var(--light); clip-path: ellipse(55% 100% at 50% 100%); }
+    .hero-badge { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1.5rem; justify-content: center; }
+    .badge-pill { display: inline-block; padding: 0.28rem 0.8rem; border-radius: 999px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; }
+    .bp-blue   { background: var(--blue); color: #fff; }
+    .bp-yellow { background: var(--yellow); color: var(--dark); }
+    .bp-green  { background: var(--green); color: #fff; }
+    .hero h1 { font-size: clamp(2rem, 5.5vw, 3.4rem); font-weight: 900; color: #fff; line-height: 1.1; margin-bottom: 0.5rem; }
+    .hero h1 em { color: var(--yellow); font-style: normal; }
+    .hero .ruc { font-size: 0.75rem; color: rgba(255,255,255,0.5); margin-bottom: 1.2rem; }
+    .hero p { font-size: 1.05rem; color: #a8c8e8; max-width: 500px; line-height: 1.65; margin: 0 auto 2rem; }
+    .btn-primary { display: inline-flex; align-items: center; gap: 0.5rem; background: #25D366; color: #fff; padding: 0.85rem 1.8rem; border-radius: 999px; font-size: 1rem; font-weight: 700; text-decoration: none; box-shadow: 0 4px 20px #25D36644; transition: transform 0.15s, filter 0.15s; }
+    .btn-primary:hover { transform: translateY(-2px); filter: brightness(1.1); }
+
+    .trust { display: grid; grid-template-columns: repeat(4,1fr); background: var(--blue); }
+    .trust-item { padding: 1.1rem 0.75rem; text-align: center; border-right: 1px solid rgba(255,255,255,0.1); }
+    .trust-item:last-child { border-right: none; }
+    .trust-num { font-size: 1.4rem; font-weight: 900; color: var(--yellow); }
+    .trust-label { font-size: 0.7rem; color: rgba(255,255,255,0.8); margin-top: 0.2rem; }
+    @media(max-width:600px) { .trust { grid-template-columns: repeat(2,1fr); } }
+
+    .services { padding: 5rem 1.5rem; max-width: 1000px; margin: 0 auto; }
+    .section-label { font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.12em; color: var(--blue); margin-bottom: 0.5rem; }
+    .section-title { font-size: clamp(1.5rem, 4vw, 2rem); font-weight: 800; color: var(--dark); margin-bottom: 0.75rem; }
+    .section-sub { color: var(--gray); font-size: 0.95rem; line-height: 1.65; max-width: 500px; margin-bottom: 2.5rem; }
+    .services-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 1rem; }
+    .service-card { background: #fff; border: 1px solid #d0e4f5; border-radius: 14px; padding: 1.4rem 1.2rem; text-align: center; transition: box-shadow 0.2s, transform 0.2s; }
+    .service-card:hover { box-shadow: 0 6px 24px #1e6bb022; transform: translateY(-3px); }
+    .service-icon { font-size: 2rem; margin-bottom: 0.6rem; }
+    .service-name { font-size: 0.85rem; font-weight: 700; color: var(--dark); }
+
+    .process { background: var(--dark); padding: 5rem 1.5rem; }
+    .process-inner { max-width: 900px; margin: 0 auto; }
+    .steps { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1.25rem; margin-top: 2rem; }
+    .step { position: relative; }
+    .step-num { font-size: 3rem; font-weight: 900; color: var(--blue); opacity: 0.4; line-height: 1; }
+    .step-title { font-size: 0.95rem; font-weight: 700; color: #fff; margin: 0.3rem 0; }
+    .step-text { font-size: 0.82rem; color: #a8c8e8; line-height: 1.6; }
+
+    .cta { padding: 5rem 1.5rem; text-align: center; background: linear-gradient(135deg, #e8f4ff, var(--light)); }
+    .cta h2 { font-size: clamp(1.4rem, 4vw, 1.9rem); font-weight: 800; color: var(--dark); margin-bottom: 0.75rem; }
+    .cta p { color: var(--gray); margin-bottom: 2rem; }
+
+    footer { background: var(--dark); color: #a8c8e8; padding: 2rem 1.5rem; text-align: center; font-size: 0.82rem; }
+    footer a { color: var(--yellow); text-decoration: none; }
+    .footer-brand { font-size: 0.7rem; color: #4a6888; margin-top: 0.5rem; }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="logo"><span class="ev">EV</span> Edwin Vereau</div>
+  <a class="nav-cta" href="https://wa.me/51924497185" target="_blank">Cotizar</a>
+</nav>
+
+<section class="hero">
+  <div class="hero-badge">
+    <span class="badge-pill bp-blue">Pintura</span>
+    <span class="badge-pill bp-yellow">Construcción</span>
+    <span class="badge-pill bp-green">Mantenimiento</span>
+  </div>
+  <h1>Servicios Múltiples<br><em>Edwin Vereau</em></h1>
+  <div class="ruc">E I R L &nbsp;·&nbsp; RUC: 20611158018 &nbsp;·&nbsp; Lima, Perú</div>
+  <p>Especialistas en pintura, trabajos de construcción y mantenimiento. Calidad profesional para tu hogar o empresa.</p>
+  <a class="btn-primary" href="https://wa.me/51924497185?text=Hola%2C%20necesito%20un%20presupuesto%20de%20sus%20servicios" target="_blank">
+    💬 Solicitar presupuesto
+  </a>
+</section>
+
+<div class="trust">
+  <div class="trust-item"><div class="trust-num">✓</div><div class="trust-label">Empresa registrada</div></div>
+  <div class="trust-item"><div class="trust-num">🏆</div><div class="trust-label">Trabajo garantizado</div></div>
+  <div class="trust-item"><div class="trust-num">⚡</div><div class="trust-label">Respuesta rápida</div></div>
+  <div class="trust-item"><div class="trust-num">📋</div><div class="trust-label">Presupuesto gratis</div></div>
+</div>
+
+<section class="services" id="servicios">
+  <div class="section-label">Lo que hacemos</div>
+  <div class="section-title">Nuestros Servicios</div>
+  <p class="section-sub">Empresa de servicios múltiples con especialización en pintura. Atendemos hogares, oficinas y locales comerciales.</p>
+  <div class="services-grid">
+    <div class="service-card"><div class="service-icon">🖌️</div><div class="service-name">Pintura General</div></div>
+    <div class="service-card"><div class="service-icon">🏠</div><div class="service-name">Pintura de Interiores</div></div>
+    <div class="service-card"><div class="service-icon">🏢</div><div class="service-name">Pintura de Exteriores</div></div>
+    <div class="service-card"><div class="service-icon">✨</div><div class="service-name">Acabados y Texturas</div></div>
+    <div class="service-card"><div class="service-icon">🔧</div><div class="service-name">Mantenimiento General</div></div>
+    <div class="service-card"><div class="service-icon">🧱</div><div class="service-name">Trabajos de Albañilería</div></div>
+    <div class="service-card"><div class="service-icon">🏗️</div><div class="service-name">Remodelaciones</div></div>
+    <div class="service-card"><div class="service-icon">🏭</div><div class="service-name">Locales Comerciales</div></div>
+  </div>
+</section>
+
+<section class="process">
+  <div class="process-inner">
+    <div class="section-label" style="color:#7dd3fc;">Así trabajamos</div>
+    <div class="section-title" style="color:#fff;">Simple y transparente</div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">01</div>
+        <div class="step-title">Nos contactas</div>
+        <div class="step-text">Escríbenos por WhatsApp con fotos del área o descripción del trabajo.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">02</div>
+        <div class="step-title">Presupuesto gratis</div>
+        <div class="step-text">Te enviamos un presupuesto sin compromiso en el menor tiempo posible.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">03</div>
+        <div class="step-title">Coordinamos</div>
+        <div class="step-text">Acordamos fechas, materiales y todo lo necesario para el trabajo.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">04</div>
+        <div class="step-title">Entregamos</div>
+        <div class="step-text">Trabajo de calidad, limpio y puntual. Tu satisfacción es nuestra prioridad.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="cta">
+  <h2>¿Necesitas pintura o mantenimiento?</h2>
+  <p>Llámanos o escríbenos y te damos presupuesto sin costo.</p>
+  <a class="btn-primary" href="https://wa.me/51924497185?text=Hola%2C%20me%20gustar%C3%ADa%20recibir%20un%20presupuesto" target="_blank" style="display:inline-flex;">
+    💬 Escribir a Edwin Vereau
+  </a>
+</section>
+
+<footer>
+  <div>Edwin Vereau Servicios Múltiples E I R L &nbsp;|&nbsp; RUC: 20611158018</div>
+  <div style="margin-top:0.4rem;">📞 <a href="https://wa.me/51924497185">924 497 185</a> &nbsp;|&nbsp; Lima, Perú</div>
+  <div class="footer-brand">Página web por PlaceinTime Web Services</div>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Elsa Ma — Tienda & Retail, Lima</title>
+  <meta name="description" content="Elsa Ma — tienda con los mejores productos a tu alcance. Calidad y variedad. Contáctanos por WhatsApp." />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root { --purple: #7C3AED; --pink: #EC4899; --amber: #F59E0B; --dark: #1A0533; --mid: #2D1060; --gray: #6B5B7A; --light: #FAF5FF; }
+    html { scroll-behavior: smooth; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--light); color: var(--dark); }
+
+    nav { position: sticky; top: 0; z-index: 100; background: var(--dark); display: flex; align-items: center; justify-content: space-between; padding: 0.85rem 1.5rem; }
+    nav .logo { font-size: 1.15rem; font-weight: 900; color: #fff; letter-spacing: -0.3px; }
+    nav .logo em { color: var(--pink); font-style: normal; }
+    .nav-cta { background: linear-gradient(90deg, var(--purple), var(--pink)); color: #fff; padding: 0.45rem 1.1rem; border-radius: 999px; font-size: 0.82rem; font-weight: 700; text-decoration: none; }
+
+    .hero { background: linear-gradient(135deg, var(--dark) 0%, var(--mid) 50%, #5b21b6 100%); min-height: 88vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 5rem 1.5rem 4rem; position: relative; overflow: hidden; }
+    .hero::before { content: ''; position: absolute; top: -50%; right: -20%; width: 600px; height: 600px; border-radius: 50%; background: radial-gradient(circle, #ec489922 0%, transparent 70%); }
+    .hero::after { content: ''; position: absolute; bottom: -2px; left: 0; right: 0; height: 60px; background: var(--light); clip-path: ellipse(55% 100% at 50% 100%); }
+    .hero-tag { display: inline-flex; align-items: center; gap: 0.5rem; background: rgba(255,255,255,0.1); color: #e9d5ff; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; padding: 0.35rem 1rem; border-radius: 999px; margin-bottom: 1.5rem; border: 1px solid rgba(255,255,255,0.2); }
+    .hero h1 { font-size: clamp(2.2rem, 6vw, 3.8rem); font-weight: 900; color: #fff; line-height: 1.1; margin-bottom: 1.2rem; }
+    .hero h1 em { background: linear-gradient(90deg, var(--pink), var(--amber)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; font-style: normal; }
+    .hero p { font-size: 1.05rem; color: #c4b5d4; max-width: 480px; line-height: 1.65; margin: 0 auto 2rem; }
+    .hero-btns { display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; }
+    .btn-primary { display: inline-flex; align-items: center; gap: 0.5rem; background: #25D366; color: #fff; padding: 0.85rem 1.8rem; border-radius: 999px; font-size: 1rem; font-weight: 700; text-decoration: none; box-shadow: 0 4px 20px #25D36644; transition: transform 0.15s, filter 0.15s; }
+    .btn-primary:hover { transform: translateY(-2px); filter: brightness(1.1); }
+    .btn-outline { display: inline-flex; align-items: center; gap: 0.5rem; background: transparent; color: #fff; padding: 0.85rem 1.8rem; border-radius: 999px; font-size: 1rem; font-weight: 600; text-decoration: none; border: 2px solid rgba(255,255,255,0.35); transition: border-color 0.15s; }
+    .btn-outline:hover { border-color: #fff; }
+
+    .trust { background: linear-gradient(90deg, var(--purple), var(--pink)); padding: 1rem 1.5rem; display: flex; justify-content: center; gap: 2.5rem; flex-wrap: wrap; }
+    .trust-item { color: rgba(255,255,255,0.9); font-size: 0.82rem; font-weight: 600; display: flex; align-items: center; gap: 0.4rem; }
+
+    .features { padding: 5rem 1.5rem; max-width: 1000px; margin: 0 auto; }
+    .section-label { font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.12em; color: var(--purple); margin-bottom: 0.5rem; }
+    .section-title { font-size: clamp(1.5rem, 4vw, 2rem); font-weight: 800; color: var(--dark); margin-bottom: 0.75rem; }
+    .section-sub { color: var(--gray); font-size: 0.95rem; line-height: 1.65; max-width: 500px; margin-bottom: 2.5rem; }
+
+    .feat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 1.25rem; }
+    .feat-card { background: #fff; border: 1px solid #ede0ff; border-radius: 16px; padding: 1.75rem 1.5rem; text-align: center; transition: box-shadow 0.2s, transform 0.2s; }
+    .feat-card:hover { box-shadow: 0 8px 32px #7c3aed22; transform: translateY(-3px); }
+    .feat-icon { font-size: 2.5rem; margin-bottom: 0.75rem; }
+    .feat-title { font-size: 0.95rem; font-weight: 700; color: var(--dark); margin-bottom: 0.3rem; }
+    .feat-text  { font-size: 0.8rem; color: var(--gray); line-height: 1.5; }
+
+    .promo { background: var(--dark); padding: 5rem 1.5rem; text-align: center; }
+    .promo-box { background: linear-gradient(135deg, var(--mid), #5b21b6); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 3rem 2rem; max-width: 600px; margin: 0 auto; }
+    .promo-box h2 { font-size: 1.6rem; font-weight: 800; color: #fff; margin-bottom: 0.75rem; }
+    .promo-box p { color: #c4b5d4; margin-bottom: 2rem; font-size: 0.95rem; }
+
+    .cta { padding: 5rem 1.5rem; text-align: center; }
+    .cta h2 { font-size: clamp(1.4rem, 4vw, 1.9rem); font-weight: 800; color: var(--dark); margin-bottom: 0.75rem; }
+    .cta p { color: var(--gray); margin-bottom: 2rem; }
+
+    footer { background: var(--dark); color: #c4b5d4; padding: 2rem 1.5rem; text-align: center; font-size: 0.82rem; }
+    footer a { color: #d8b4fe; text-decoration: none; }
+    .footer-brand { font-size: 0.7rem; color: #6b5b7a; margin-top: 0.5rem; }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">Elsa <em>Ma</em></div>
+  <a class="nav-cta" href="https://wa.me/51990247354" target="_blank">Contáctanos</a>
+</nav>
+
+<section class="hero">
+  <span class="hero-tag">🛍️ Shopping &amp; Retail — Lima, Perú</span>
+  <h1>Todo lo que<br>necesitas, <em>aquí</em></h1>
+  <p>Encuentra los mejores productos con la atención personalizada que mereces. Calidad, variedad y los mejores precios.</p>
+  <div class="hero-btns">
+    <a class="btn-primary" href="https://wa.me/51990247354?text=Hola%2C%20me%20gustar%C3%ADa%20ver%20sus%20productos" target="_blank">💬 Ver productos por WhatsApp</a>
+    <a class="btn-outline" href="#productos">Explorar</a>
+  </div>
+</section>
+
+<div class="trust">
+  <div class="trust-item">✨ Productos de calidad</div>
+  <div class="trust-item">🚀 Atención rápida</div>
+  <div class="trust-item">💯 Clientes satisfechos</div>
+  <div class="trust-item">📦 Entrega a domicilio</div>
+</div>
+
+<section class="features" id="productos">
+  <div class="section-label">Lo que ofrecemos</div>
+  <div class="section-title">Tu tienda de confianza</div>
+  <p class="section-sub">Amplia variedad de productos seleccionados para satisfacer tus necesidades. Todo con atención personalizada.</p>
+  <div class="feat-grid">
+    <div class="feat-card">
+      <div class="feat-icon">🛍️</div>
+      <div class="feat-title">Amplio Catálogo</div>
+      <div class="feat-text">Variedad de productos para todas tus necesidades.</div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">💎</div>
+      <div class="feat-title">Calidad Garantizada</div>
+      <div class="feat-text">Productos seleccionados y verificados para ti.</div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">💰</div>
+      <div class="feat-title">Mejores Precios</div>
+      <div class="feat-text">Precios competitivos y ofertas especiales.</div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">📱</div>
+      <div class="feat-title">Pedido por WhatsApp</div>
+      <div class="feat-text">Pide fácil y rápido desde tu celular.</div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">🚚</div>
+      <div class="feat-title">Delivery Disponible</div>
+      <div class="feat-text">Recibe tus productos donde estés en Lima.</div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">⭐</div>
+      <div class="feat-title">Atención Personalizada</div>
+      <div class="feat-text">Te asesoramos para que encuentres lo que buscas.</div>
+    </div>
+  </div>
+</section>
+
+<section class="promo">
+  <div class="promo-box">
+    <h2>¿No encuentras lo que buscas?</h2>
+    <p>Escríbenos y lo buscamos por ti. Tenemos acceso a una amplia red de proveedores.</p>
+    <a class="btn-primary" href="https://wa.me/51990247354?text=Hola%2C%20estoy%20buscando%20un%20producto%20específico" target="_blank" style="display:inline-flex;">
+      💬 Consultar disponibilidad
+    </a>
+  </div>
+</section>
+
+<section class="cta">
+  <h2>¿Lista para comprar?</h2>
+  <p>Escríbenos por WhatsApp y te atendemos de inmediato.</p>
+  <a class="btn-primary" href="https://wa.me/51990247354?text=Hola%20Elsa%2C%20me%20gustar%C3%ADa%20hacer%20un%20pedido" target="_blank" style="display:inline-flex;">
+    💬 Hacer un pedido ahora
+  </a>
+</section>
+
+<footer>
+  <div>Elsa Ma &nbsp;|&nbsp; 📞 <a href="https://wa.me/51990247354">+51 990 247 354</a> &nbsp;|&nbsp; Lima, Perú</div>
+  <div class="footer-brand">Página web por PlaceinTime Web Services</div>
+</footer>
+
+</body>
+</html>

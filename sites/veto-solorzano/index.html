@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Carpintería Solorzano — Muebles a Medida, Lima</title>
+  <meta name="description" content="Carpintería artesanal en Lima. Muebles a medida, cocinas, clósets, puertas. Calidad y puntualidad garantizada. Escríbenos por WhatsApp." />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --wood:   #8B4513;
+      --amber:  #D2691E;
+      --gold:   #C8961C;
+      --light:  #FFF8EE;
+      --dark:   #2A1200;
+      --gray:   #6B5040;
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--light); color: var(--dark); }
+
+    /* NAV */
+    nav { position: sticky; top: 0; z-index: 100; background: var(--dark); display: flex; align-items: center; justify-content: space-between; padding: 0.85rem 1.5rem; }
+    nav .logo { font-size: 1.1rem; font-weight: 800; color: #fff; letter-spacing: -0.3px; }
+    nav .logo span { color: var(--gold); }
+    .nav-cta { background: var(--gold); color: var(--dark); padding: 0.45rem 1.1rem; border-radius: 999px; font-size: 0.82rem; font-weight: 700; text-decoration: none; }
+
+    /* HERO */
+    .hero { background: linear-gradient(135deg, var(--dark) 0%, #4a2000 60%, var(--wood) 100%); min-height: 90vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 5rem 1.5rem 4rem; position: relative; overflow: hidden; }
+    .hero::before { content: ''; position: absolute; inset: 0; background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E"); }
+    .hero-tag { background: var(--gold); color: var(--dark); font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.12em; padding: 0.3rem 0.9rem; border-radius: 999px; margin-bottom: 1.5rem; display: inline-block; }
+    .hero h1 { font-size: clamp(2.2rem, 6vw, 3.8rem); font-weight: 900; color: #fff; line-height: 1.1; margin-bottom: 1.2rem; }
+    .hero h1 span { color: var(--gold); }
+    .hero p { font-size: 1.1rem; color: #d4b896; max-width: 520px; line-height: 1.65; margin-bottom: 2rem; }
+    .hero-btns { display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; }
+    .btn-primary { display: inline-flex; align-items: center; gap: 0.5rem; background: #25D366; color: #fff; padding: 0.85rem 1.8rem; border-radius: 999px; font-size: 1rem; font-weight: 700; text-decoration: none; box-shadow: 0 4px 20px #25D36644; transition: transform 0.15s, filter 0.15s; }
+    .btn-primary:hover { transform: translateY(-2px); filter: brightness(1.1); }
+    .btn-secondary { display: inline-flex; align-items: center; gap: 0.5rem; background: transparent; color: #fff; padding: 0.85rem 1.8rem; border-radius: 999px; font-size: 1rem; font-weight: 600; text-decoration: none; border: 2px solid #ffffff44; transition: border-color 0.15s; }
+    .btn-secondary:hover { border-color: #fff; }
+
+    /* TRUST BAR */
+    .trust { background: var(--wood); padding: 1rem 1.5rem; display: flex; justify-content: center; gap: 2.5rem; flex-wrap: wrap; }
+    .trust-item { color: #ffe4c4; font-size: 0.82rem; font-weight: 600; display: flex; align-items: center; gap: 0.4rem; }
+
+    /* SERVICES */
+    .services { padding: 5rem 1.5rem; max-width: 1000px; margin: 0 auto; }
+    .section-label { font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.12em; color: var(--amber); margin-bottom: 0.6rem; }
+    .section-title { font-size: clamp(1.6rem, 4vw, 2.2rem); font-weight: 800; color: var(--dark); margin-bottom: 0.75rem; }
+    .section-sub { color: var(--gray); font-size: 0.95rem; line-height: 1.6; max-width: 540px; margin-bottom: 2.5rem; }
+    .services-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1.25rem; }
+    .service-card { background: #fff; border: 1px solid #e8d5c0; border-radius: 14px; padding: 1.5rem; text-align: center; transition: box-shadow 0.2s, transform 0.2s; }
+    .service-card:hover { box-shadow: 0 8px 32px #8b451322; transform: translateY(-3px); }
+    .service-icon { font-size: 2.2rem; margin-bottom: 0.75rem; }
+    .service-name { font-size: 0.92rem; font-weight: 700; color: var(--dark); }
+    .service-desc { font-size: 0.78rem; color: var(--gray); margin-top: 0.3rem; line-height: 1.5; }
+
+    /* WHY US */
+    .why { background: var(--dark); padding: 5rem 1.5rem; }
+    .why-inner { max-width: 900px; margin: 0 auto; }
+    .why .section-label { color: var(--gold); }
+    .why .section-title { color: #fff; }
+    .why .section-sub { color: #d4b896; }
+    .why-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1.25rem; }
+    .why-card { background: #3d1a0088; border: 1px solid #6b3a1f44; border-radius: 12px; padding: 1.5rem; }
+    .why-num { font-size: 2rem; font-weight: 900; color: var(--gold); margin-bottom: 0.5rem; }
+    .why-title { font-size: 0.95rem; font-weight: 700; color: #fff; margin-bottom: 0.3rem; }
+    .why-text { font-size: 0.82rem; color: #d4b896; line-height: 1.6; }
+
+    /* CTA */
+    .cta { padding: 5rem 1.5rem; text-align: center; background: linear-gradient(135deg, #fdf0e0, #fff8ee); }
+    .cta h2 { font-size: clamp(1.5rem, 4vw, 2rem); font-weight: 800; color: var(--dark); margin-bottom: 0.75rem; }
+    .cta p { color: var(--gray); margin-bottom: 2rem; font-size: 0.95rem; }
+
+    /* FOOTER */
+    footer { background: var(--dark); color: #d4b896; padding: 2rem 1.5rem; text-align: center; font-size: 0.82rem; }
+    footer a { color: var(--gold); text-decoration: none; }
+    .footer-brand { font-size: 0.7rem; color: #6B5040; margin-top: 0.5rem; }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">Carpintería <span>Solorzano</span></div>
+  <a class="nav-cta" href="https://wa.me/solorzano" target="_blank">Cotizar ahora</a>
+</nav>
+
+<section class="hero">
+  <span class="hero-tag">Carpintería Artesanal — Lima, Perú</span>
+  <h1>Muebles que <span>duran toda la vida</span></h1>
+  <p>Fabricamos muebles a medida con madera de calidad. Cocinas, clósets, puertas y todo lo que imagines. Diseño, elegancia y solidez en cada pieza.</p>
+  <div class="hero-btns">
+    <a class="btn-primary" href="https://wa.me/solorzano" target="_blank">
+      💬 Escríbenos por WhatsApp
+    </a>
+    <a class="btn-secondary" href="#servicios">Ver servicios</a>
+  </div>
+</section>
+
+<div class="trust">
+  <div class="trust-item">⭐ Trabajo garantizado</div>
+  <div class="trust-item">📐 Medidas exactas</div>
+  <div class="trust-item">🚚 Instalación incluida</div>
+  <div class="trust-item">🏆 Años de experiencia</div>
+</div>
+
+<section class="services" id="servicios">
+  <div class="section-label">Nuestros Servicios</div>
+  <div class="section-title">¿Qué podemos hacer por ti?</div>
+  <p class="section-sub">Trabajamos la madera con precisión y pasión. Cada proyecto es único y se adapta a tus necesidades y espacio.</p>
+  <div class="services-grid">
+    <div class="service-card">
+      <div class="service-icon">🛋️</div>
+      <div class="service-name">Muebles a Medida</div>
+      <div class="service-desc">Diseñados especialmente para tu espacio y estilo.</div>
+    </div>
+    <div class="service-card">
+      <div class="service-icon">🍳</div>
+      <div class="service-name">Cocinas Empotradas</div>
+      <div class="service-desc">Módulos de cocina modernos y funcionales.</div>
+    </div>
+    <div class="service-card">
+      <div class="service-icon">👗</div>
+      <div class="service-name">Clósets y Roperos</div>
+      <div class="service-desc">Aprovecha cada centímetro de tu espacio.</div>
+    </div>
+    <div class="service-card">
+      <div class="service-icon">🚪</div>
+      <div class="service-name">Puertas y Ventanas</div>
+      <div class="service-desc">Acabados finos en madera sólida o MDF.</div>
+    </div>
+    <div class="service-card">
+      <div class="service-icon">🪑</div>
+      <div class="service-name">Muebles de Sala</div>
+      <div class="service-desc">Mesas, repisas, aparadores y más.</div>
+    </div>
+    <div class="service-card">
+      <div class="service-icon">🔨</div>
+      <div class="service-name">Reparaciones</div>
+      <div class="service-desc">Restauramos y reparamos muebles existentes.</div>
+    </div>
+  </div>
+</section>
+
+<section class="why">
+  <div class="why-inner">
+    <div class="section-label">¿Por qué elegirnos?</div>
+    <div class="section-title" style="color:#fff;">Calidad que se nota</div>
+    <p class="section-sub">Nos diferenciamos por el trato personalizado y la calidad del acabado en cada proyecto.</p>
+    <div class="why-grid">
+      <div class="why-card">
+        <div class="why-num">01</div>
+        <div class="why-title">Madera de Calidad</div>
+        <div class="why-text">Trabajamos con materiales seleccionados para garantizar durabilidad y belleza.</div>
+      </div>
+      <div class="why-card">
+        <div class="why-num">02</div>
+        <div class="why-title">Diseño Personalizado</div>
+        <div class="why-text">Cada pieza es única, adaptada a tu espacio, gusto y presupuesto.</div>
+      </div>
+      <div class="why-card">
+        <div class="why-num">03</div>
+        <div class="why-title">Puntualidad</div>
+        <div class="why-text">Cumplimos los plazos acordados. Tu tiempo es valioso para nosotros.</div>
+      </div>
+      <div class="why-card">
+        <div class="why-num">04</div>
+        <div class="why-title">Precio Justo</div>
+        <div class="why-text">Presupuesto sin compromiso. Calidad premium a precios accesibles.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="cta">
+  <h2>¿Listo para tu proyecto?</h2>
+  <p>Escríbenos ahora y te enviamos un presupuesto sin costo.</p>
+  <a class="btn-primary" href="https://wa.me/solorzano?text=Hola%2C%20me%20interesa%20un%20presupuesto%20para%20carpinter%C3%ADa" target="_blank" style="display:inline-flex;">
+    💬 Solicitar presupuesto gratis
+  </a>
+</section>
+
+<footer>
+  <div>📍 Lima, Perú &nbsp;|&nbsp; 💬 <a href="https://wa.me/solorzano" target="_blank">WhatsApp: solorzano</a></div>
+  <div class="footer-brand">Página web por PlaceinTime Web Services</div>
+</footer>
+
+</body>
+</html>
