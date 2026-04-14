@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OmniVoice — Local TTS</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: #0f1117;
+      color: #e2e8f0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem 1rem;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    header h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #a78bfa, #60a5fa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    header p {
+      color: #94a3b8;
+      margin-top: 0.4rem;
+      font-size: 0.95rem;
+    }
+
+    .card {
+      background: #1e2130;
+      border: 1px solid #2d3148;
+      border-radius: 12px;
+      padding: 1.5rem;
+      width: 100%;
+      max-width: 800px;
+      margin-bottom: 1.25rem;
+    }
+    .card h2 {
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #7c86a2;
+      margin-bottom: 1rem;
+    }
+
+    textarea, input[type="text"], input[type="number"] {
+      width: 100%;
+      background: #0f1117;
+      border: 1px solid #2d3148;
+      border-radius: 8px;
+      color: #e2e8f0;
+      font-family: inherit;
+      font-size: 0.95rem;
+      padding: 0.75rem 1rem;
+      outline: none;
+      transition: border-color 0.2s;
+      resize: vertical;
+    }
+    textarea:focus, input:focus {
+      border-color: #7c3aed;
+    }
+    textarea {
+      min-height: 220px;
+    }
+
+    label {
+      display: block;
+      font-size: 0.85rem;
+      color: #94a3b8;
+      margin-bottom: 0.4rem;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    .field { margin-bottom: 0; }
+
+    .upload-area {
+      border: 2px dashed #2d3148;
+      border-radius: 8px;
+      padding: 1rem;
+      text-align: center;
+      cursor: pointer;
+      color: #7c86a2;
+      font-size: 0.9rem;
+      transition: border-color 0.2s, color 0.2s;
+      position: relative;
+    }
+    .upload-area:hover { border-color: #7c3aed; color: #a78bfa; }
+    .upload-area input[type="file"] {
+      position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
+    }
+    .upload-area .filename {
+      margin-top: 0.4rem;
+      font-size: 0.8rem;
+      color: #60a5fa;
+    }
+
+    .hint {
+      font-size: 0.78rem;
+      color: #4a5568;
+      margin-top: 0.4rem;
+    }
+
+    button[type="submit"] {
+      width: 100%;
+      max-width: 800px;
+      padding: 0.9rem;
+      background: linear-gradient(135deg, #7c3aed, #2563eb);
+      border: none;
+      border-radius: 10px;
+      color: #fff;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.1s;
+      letter-spacing: 0.03em;
+    }
+    button[type="submit"]:hover { opacity: 0.9; }
+    button[type="submit"]:active { transform: scale(0.99); }
+    button[type="submit"]:disabled { opacity: 0.45; cursor: not-allowed; }
+
+    #progress-card { display: none; }
+
+    #log {
+      background: #0a0c14;
+      border-radius: 8px;
+      padding: 1rem;
+      font-family: 'Cascadia Code', 'Consolas', monospace;
+      font-size: 0.82rem;
+      color: #94a3b8;
+      height: 220px;
+      overflow-y: auto;
+      line-height: 1.6;
+    }
+    #log .line-ok   { color: #4ade80; }
+    #log .line-warn { color: #facc15; }
+    #log .line-err  { color: #f87171; }
+    #log .line-info { color: #60a5fa; }
+
+    #download-btn {
+      display: none;
+      width: 100%;
+      padding: 0.85rem;
+      background: #16a34a;
+      border: none;
+      border-radius: 10px;
+      color: #fff;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 1rem;
+      transition: opacity 0.2s;
+    }
+    #download-btn:hover { opacity: 0.88; }
+
+    .word-count {
+      font-size: 0.78rem;
+      color: #4a5568;
+      text-align: right;
+      margin-top: 0.3rem;
+    }
+    .word-count span { color: #7c86a2; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>OmniVoice Local</h1>
+  <p>Long-form text-to-speech · runs entirely on your machine · no limits</p>
+</header>
+
+<form id="tts-form" autocomplete="off">
+
+  <!-- Text input -->
+  <div class="card">
+    <h2>Text</h2>
+    <label for="text">Paste anything — articles, scripts, books</label>
+    <textarea id="text" name="text" placeholder="Paste your text here. No character limit." required></textarea>
+    <div class="word-count">Words: <span id="wc">0</span></div>
+  </div>
+
+  <!-- Voice options -->
+  <div class="card">
+    <h2>Voice Options</h2>
+    <div class="row">
+      <div class="field">
+        <label>Voice Clone — Reference Audio <em style="font-style:normal;color:#4a5568">(optional)</em></label>
+        <div class="upload-area" id="upload-box">
+          <div>🎙 Click to upload a voice sample</div>
+          <div class="hint">WAV / MP3 · 3 seconds minimum</div>
+          <div class="filename" id="filename"></div>
+          <input type="file" name="ref_audio" id="ref_audio" accept="audio/*" />
+        </div>
+      </div>
+      <div class="field">
+        <label for="instruct">Voice Design Prompt <em style="font-style:normal;color:#4a5568">(optional)</em></label>
+        <input type="text" id="instruct" name="instruct"
+          placeholder="e.g. female, warm, Peruvian accent" />
+        <div class="hint">Leave blank when using a reference audio file.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Settings -->
+  <div class="card">
+    <h2>Settings</h2>
+    <label for="max_words">Words per chunk
+      <em style="font-style:normal;color:#4a5568"> — lower = safer on less VRAM</em>
+    </label>
+    <input type="number" id="max_words" name="max_words" value="400" min="50" max="1000" />
+    <div class="hint">Recommended: 200–500. Each chunk is synthesized separately then joined.</div>
+  </div>
+
+  <button type="submit" id="submit-btn">Synthesize</button>
+
+</form>
+
+<!-- Progress -->
+<div class="card" id="progress-card" style="margin-top:1.25rem;max-width:800px;width:100%">
+  <h2>Progress</h2>
+  <div id="log"></div>
+  <button id="download-btn">⬇ Download Audio</button>
+</div>
+
+<script>
+  // Word counter
+  const textEl = document.getElementById('text');
+  const wcEl   = document.getElementById('wc');
+  textEl.addEventListener('input', () => {
+    const words = textEl.value.trim() ? textEl.value.trim().split(/\s+/).length : 0;
+    wcEl.textContent = words.toLocaleString();
+  });
+
+  // File upload label
+  document.getElementById('ref_audio').addEventListener('change', e => {
+    const name = e.target.files[0]?.name || '';
+    document.getElementById('filename').textContent = name;
+  });
+
+  // Form submit
+  document.getElementById('tts-form').addEventListener('submit', async e => {
+    e.preventDefault();
+
+    const btn  = document.getElementById('submit-btn');
+    const card = document.getElementById('progress-card');
+    const log  = document.getElementById('log');
+    const dlBtn = document.getElementById('download-btn');
+
+    btn.disabled = true;
+    btn.textContent = 'Synthesizing…';
+    card.style.display = 'block';
+    log.innerHTML = '';
+    dlBtn.style.display = 'none';
+
+    const fd = new FormData(e.target);
+    const res = await fetch('/synthesize', { method: 'POST', body: fd });
+    const { job_id } = await res.json();
+
+    appendLog(`🚀 Job started (ID: ${job_id})`, 'info');
+
+    const es = new EventSource(`/progress/${job_id}`);
+    es.onmessage = ev => {
+      const data = ev.data;
+
+      if (data.startsWith('__STATUS__')) {
+        es.close();
+        const parts = data.split('__');
+        const status = parts[2];
+        if (status === 'done') {
+          appendLog('🎉 Synthesis complete!', 'ok');
+          dlBtn.style.display = 'block';
+          dlBtn.onclick = () => { window.location = `/download/${job_id}`; };
+        } else {
+          appendLog('❌ Synthesis failed — see errors above.', 'err');
+        }
+        btn.disabled = false;
+        btn.textContent = 'Synthesize';
+        return;
+      }
+
+      const cls = data.startsWith('✅') ? 'ok'
+                : data.startsWith('⚠')  ? 'warn'
+                : data.startsWith('❌') ? 'err'
+                : data.startsWith('🚀') || data.startsWith('📝') || data.startsWith('🔗') ? 'info'
+                : '';
+      appendLog(data, cls);
+    };
+
+    es.onerror = () => {
+      appendLog('⚠️  Connection lost — synthesis may still be running.', 'warn');
+      es.close();
+      btn.disabled = false;
+      btn.textContent = 'Synthesize';
+    };
+  });
+
+  function appendLog(msg, cls = '') {
+    const log = document.getElementById('log');
+    const div = document.createElement('div');
+    if (cls) div.className = `line-${cls}`;
+    div.textContent = msg;
+    log.appendChild(div);
+    log.scrollTop = log.scrollHeight;
+  }
+</script>
+</body>
+</html>
