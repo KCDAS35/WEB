@@ -1,12 +1,12 @@
 """
-OmniVoice Local App — Windows
+OmniVoice Local App — Windows / Linux
 FastAPI backend with chunked long-form TTS synthesis.
+The model is loaded once at startup and kept in memory.
 """
 
 import asyncio
-import os
+import logging
 import re
-import subprocess
 import threading
 import time
 import uuid
@@ -16,6 +16,7 @@ from typing import Optional
 
 import numpy as np
 import soundfile as sf
+import torch
 import uvicorn
 from fastapi import FastAPI, File, Form, UploadFile
 from fastapi.responses import FileResponse, HTMLResponse, StreamingResponse
@@ -26,6 +27,60 @@ JOBS: dict[str, dict] = {}
 OUTPUT_DIR = Path(__file__).parent / "outputs"
 OUTPUT_DIR.mkdir(exist_ok=True)
 TEMPLATES_DIR = Path(__file__).parent / "templates"
+
+
+# ── Model singleton ──────────────────────────────────────────────────────────
+
+_MODEL = None
+_MODEL_LOCK = threading.Lock()
+MODEL_STATUS: dict = {"state": "loading", "log": []}
+# state values: "loading" | "ready" | "error"
+
+
+def _best_device() -> str:
+    if torch.cuda.is_available():
+        return "cuda"
+    try:
+        if torch.backends.mps.is_available():
+            return "mps"
+    except Exception:
+        pass
+    return "cpu"
+
+
+class _LogCapture(logging.Handler):
+    """Appends formatted log records to MODEL_STATUS["log"]."""
+    def emit(self, record: logging.LogRecord) -> None:
+        MODEL_STATUS["log"].append(self.format(record))
+
+
+def _load_model() -> None:
+    global _MODEL
+    handler = _LogCapture()
+    handler.setFormatter(logging.Formatter("%(message)s"))
+    logging.getLogger().addHandler(handler)
+    try:
+        from omnivoice.models.omnivoice import OmniVoice
+        device = _best_device()
+        dtype = torch.float16 if device != "cpu" else torch.float32
+        MODEL_STATUS["log"].append(
+            f"⏳ Loading OmniVoice on {device} — "
+            f"first run downloads ~4 GB, this may take a while..."
+        )
+        _MODEL = OmniVoice.from_pretrained(
+            "k2-fsa/OmniVoice", device_map=device, dtype=dtype
+        )
+        MODEL_STATUS["state"] = "ready"
+        MODEL_STATUS["log"].append("✅ Model loaded and ready.")
+    except Exception as exc:
+        MODEL_STATUS["state"] = "error"
+        MODEL_STATUS["log"].append(f"❌ Model load failed: {exc}")
+    finally:
+        logging.getLogger().removeHandler(handler)
+
+
+# Start loading in the background immediately
+threading.Thread(target=_load_model, daemon=True).start()
 
 
 # ── Text chunking ────────────────────────────────────────────────────────────
@@ -50,19 +105,6 @@ def chunk_text(text: str, max_words: int = 400) -> list[str]:
 
 # ── Synthesis worker (runs in a thread) ─────────────────────────────────────
 
-def _stream_stderr(pipe, log_fn):
-    """Forward stderr lines from a subprocess into the job log."""
-    try:
-        for raw in iter(pipe.readline, ""):
-            line = raw.strip()
-            if line:
-                log_fn(f"  {line}")
-    except Exception:
-        pass
-    finally:
-        pipe.close()
-
-
 def run_synthesis(
     job_id: str,
     text: str,
@@ -76,6 +118,22 @@ def run_synthesis(
         job["log"].append(msg)
 
     try:
+        # Wait for model to finish loading
+        log("⏳ Waiting for model to be ready...")
+        while MODEL_STATUS["state"] == "loading":
+            if job.get("cancelled"):
+                log("🛑 Cancelled.")
+                job["status"] = "cancelled"
+                return
+            time.sleep(0.5)
+
+        if MODEL_STATUS["state"] != "ready":
+            last = MODEL_STATUS["log"][-1] if MODEL_STATUS["log"] else "unknown error"
+            log(f"❌ Model unavailable: {last}")
+            job["status"] = "failed"
+            return
+
+        log("✅ Model ready — starting synthesis.")
         chunks = chunk_text(text, max_words)
         total = len(text.split())
         log(f"📝 {total:,} words → {len(chunks)} chunks (max {max_words} words each)")
@@ -90,56 +148,24 @@ def run_synthesis(
             out = OUTPUT_DIR / f"_chunk_{job_id}_{i:04d}.wav"
             log(f"[{i + 1}/{len(chunks)}] Synthesizing {len(chunk.split())} words...")
 
-            cmd = [
-                "omnivoice-infer",
-                "--model", "k2-fsa/OmniVoice",
-                "--text", chunk,
-                "--output", str(out),
-            ]
-            if ref_audio_path:
-                cmd += ["--ref_audio", str(ref_audio_path)]
-            if instruct:
-                cmd += ["--instruct", instruct]
-
             t0 = time.monotonic()
             try:
-                proc = subprocess.Popen(
-                    cmd,
-                    stdout=subprocess.DEVNULL,
-                    stderr=subprocess.PIPE,
-                    text=True,
-                    bufsize=1,
-                    encoding="utf-8",
-                    errors="replace",
-                )
-                job["proc"] = proc
-                t_err = threading.Thread(
-                    target=_stream_stderr, args=(proc.stderr, log), daemon=True
-                )
-                t_err.start()
-                try:
-                    proc.wait(timeout=300)
-                except subprocess.TimeoutExpired:
-                    proc.kill()
-                    proc.wait()
-                    t_err.join(timeout=2)
-                    elapsed = time.monotonic() - t0
-                    log(f"⏱️  Chunk {i + 1} timed out after {elapsed:.0f}s — skipping.")
-                    continue
-                finally:
-                    t_err.join(timeout=2)
-                    job.pop("proc", None)
+                with _MODEL_LOCK:
+                    audios = _MODEL.generate(
+                        text=chunk,
+                        ref_audio=str(ref_audio_path) if ref_audio_path else None,
+                        instruct=instruct,
+                    )
+                sf.write(str(out), audios[0], _MODEL.sampling_rate)
             except Exception as exc:
-                log(f"⚠️  Chunk {i + 1} error: {exc}")
+                elapsed = time.monotonic() - t0
+                log(f"⚠️  Chunk {i + 1} error ({elapsed:.0f}s): {exc}")
+                log(f"__PROGRESS__{i + 1}__{len(chunks)}__")
                 continue
 
             elapsed = time.monotonic() - t0
-            if proc.returncode != 0:
-                log(f"⚠️  Chunk {i + 1} failed ({elapsed:.0f}s)")
-            else:
-                log(f"✅ Chunk {i + 1} done ({elapsed:.0f}s)")
-                wav_files.append(out)
-
+            log(f"✅ Chunk {i + 1} done ({elapsed:.0f}s)")
+            wav_files.append(out)
             log(f"__PROGRESS__{i + 1}__{len(chunks)}__")
 
         if not wav_files:
@@ -162,7 +188,7 @@ def run_synthesis(
         if ref_audio_path and ref_audio_path.exists():
             ref_audio_path.unlink(missing_ok=True)
 
-        mins = total / 150  # ~150 words per minute spoken
+        mins = total / 150
         log(f"✅ Done!  Words: {total:,}  |  Estimated length: ~{mins:.1f} min")
         job["output"] = str(final)
         job["status"] = "done"
@@ -179,6 +205,28 @@ def run_synthesis(
 @app.get("/", response_class=HTMLResponse)
 def index() -> str:
     return (TEMPLATES_DIR / "index.html").read_text(encoding="utf-8")
+
+
+@app.get("/model-status")
+def get_model_status():
+    return {"state": MODEL_STATUS["state"]}
+
+
+@app.get("/model-log")
+async def model_log_stream():
+    """SSE stream of model loading log lines."""
+    async def stream():
+        sent = 0
+        while True:
+            while sent < len(MODEL_STATUS["log"]):
+                line = MODEL_STATUS["log"][sent].replace("\n", " ")
+                yield f"data: {line}\n\n"
+                sent += 1
+            if MODEL_STATUS["state"] != "loading":
+                yield f"data: __MODEL_STATE__{MODEL_STATUS['state']}__\n\n"
+                break
+            await asyncio.sleep(0.5)
+    return StreamingResponse(stream(), media_type="text/event-stream")
 
 
 @app.post("/synthesize")
@@ -209,7 +257,6 @@ async def synthesize(
 @app.get("/progress/{job_id}")
 async def progress(job_id: str):
     """Server-Sent Events stream — delivers log lines in real time."""
-
     async def stream():
         sent = 0
         while True:
@@ -217,18 +264,14 @@ async def progress(job_id: str):
             if not job:
                 yield "data: ❌ Job not found\n\n"
                 break
-
             while sent < len(job["log"]):
                 line = job["log"][sent].replace("\n", " ")
                 yield f"data: {line}\n\n"
                 sent += 1
-
             if job["done"]:
                 yield f"data: __STATUS__{job['status']}__{job_id}__\n\n"
                 break
-
             await asyncio.sleep(0.4)
-
     return StreamingResponse(stream(), media_type="text/event-stream")
 
 
@@ -238,12 +281,6 @@ def cancel_job(job_id: str):
     if not job:
         return {"error": "Job not found"}
     job["cancelled"] = True
-    proc = job.get("proc")
-    if proc:
-        try:
-            proc.kill()
-        except Exception:
-            pass
     return {"ok": True}
 
 

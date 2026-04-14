@@ -36,6 +36,56 @@
       font-size: 0.95rem;
     }
 
+    /* ── Model status banner ── */
+    #model-banner {
+      width: 100%;
+      max-width: 800px;
+      border-radius: 10px;
+      padding: 0.75rem 1rem;
+      margin-bottom: 1.25rem;
+      font-size: 0.88rem;
+      font-weight: 500;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+    #model-banner.loading {
+      background: #1e2130;
+      border: 1px solid #4a3f6b;
+      color: #c4b5fd;
+    }
+    #model-banner.ready {
+      background: #0d2318;
+      border: 1px solid #166534;
+      color: #4ade80;
+    }
+    #model-banner.error {
+      background: #2d0f0f;
+      border: 1px solid #991b1b;
+      color: #f87171;
+    }
+    #model-banner-row {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    #model-log {
+      font-family: 'Cascadia Code', 'Consolas', monospace;
+      font-size: 0.78rem;
+      color: #7c86a2;
+      max-height: 80px;
+      overflow-y: auto;
+      padding: 0.4rem 0.5rem;
+      background: #0a0c14;
+      border-radius: 6px;
+      display: none;
+    }
+    #model-spinner {
+      display: inline-block;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
     .card {
       background: #1e2130;
       border: 1px solid #2d3148;
@@ -67,12 +117,8 @@
       transition: border-color 0.2s;
       resize: vertical;
     }
-    textarea:focus, input:focus {
-      border-color: #7c3aed;
-    }
-    textarea {
-      min-height: 220px;
-    }
+    textarea:focus, input:focus { border-color: #7c3aed; }
+    textarea { min-height: 220px; }
 
     label {
       display: block;
@@ -86,7 +132,6 @@
       grid-template-columns: 1fr 1fr;
       gap: 1rem;
     }
-
     .field { margin-bottom: 0; }
 
     .upload-area {
@@ -104,17 +149,9 @@
     .upload-area input[type="file"] {
       position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
     }
-    .upload-area .filename {
-      margin-top: 0.4rem;
-      font-size: 0.8rem;
-      color: #60a5fa;
-    }
+    .upload-area .filename { margin-top: 0.4rem; font-size: 0.8rem; color: #60a5fa; }
 
-    .hint {
-      font-size: 0.78rem;
-      color: #4a5568;
-      margin-top: 0.4rem;
-    }
+    .hint { font-size: 0.78rem; color: #4a5568; margin-top: 0.4rem; }
 
     button[type="submit"] {
       width: 100%;
@@ -223,9 +260,17 @@
   <p>Long-form text-to-speech · runs entirely on your machine · no limits</p>
 </header>
 
+<!-- Model status banner -->
+<div id="model-banner" class="loading">
+  <div id="model-banner-row">
+    <span id="model-spinner">⟳</span>
+    <span id="model-text">Loading model — first run downloads ~4 GB, please wait...</span>
+  </div>
+  <div id="model-log"></div>
+</div>
+
 <form id="tts-form" autocomplete="off">
 
-  <!-- Text input -->
   <div class="card">
     <h2>Text</h2>
     <label for="text">Paste anything — articles, scripts, books</label>
@@ -233,7 +278,6 @@
     <div class="word-count">Words: <span id="wc">0</span></div>
   </div>
 
-  <!-- Voice options -->
   <div class="card">
     <h2>Voice Options</h2>
     <div class="row">
@@ -255,7 +299,6 @@
     </div>
   </div>
 
-  <!-- Settings -->
   <div class="card">
     <h2>Settings</h2>
     <label for="max_words">Words per chunk
@@ -265,11 +308,10 @@
     <div class="hint">Recommended: 200–500. Each chunk is synthesized separately then joined.</div>
   </div>
 
-  <button type="submit" id="submit-btn">Synthesize</button>
+  <button type="submit" id="submit-btn" disabled>Model loading...</button>
 
 </form>
 
-<!-- Progress -->
 <div class="card" id="progress-card" style="margin-top:1.25rem;max-width:800px;width:100%">
   <h2>Progress</h2>
   <div id="progress-label"></div>
@@ -280,7 +322,7 @@
 </div>
 
 <script>
-  // Word counter
+  // ── Word counter ──────────────────────────────────────────────────────────
   const textEl = document.getElementById('text');
   const wcEl   = document.getElementById('wc');
   textEl.addEventListener('input', () => {
@@ -288,21 +330,85 @@
     wcEl.textContent = words.toLocaleString();
   });
 
-  // File upload label
   document.getElementById('ref_audio').addEventListener('change', e => {
     const name = e.target.files[0]?.name || '';
     document.getElementById('filename').textContent = name;
   });
 
-  // Form submit
+  // ── Model status ──────────────────────────────────────────────────────────
+  const banner     = document.getElementById('model-banner');
+  const modelText  = document.getElementById('model-text');
+  const modelLog   = document.getElementById('model-log');
+  const spinner    = document.getElementById('model-spinner');
+  const submitBtn  = document.getElementById('submit-btn');
+
+  function setModelReady() {
+    banner.className = 'ready';
+    spinner.style.animation = 'none';
+    spinner.textContent = '✅';
+    modelText.textContent = 'Model loaded and ready.';
+    modelLog.style.display = 'none';
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Synthesize';
+  }
+
+  function setModelError(msg) {
+    banner.className = 'error';
+    spinner.style.animation = 'none';
+    spinner.textContent = '❌';
+    modelText.textContent = 'Model failed to load — see details below.';
+    if (msg) {
+      modelLog.style.display = 'block';
+      const d = document.createElement('div');
+      d.textContent = msg;
+      modelLog.appendChild(d);
+    }
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Model unavailable';
+  }
+
+  // Check if model is already ready (page reload after load)
+  fetch('/model-status')
+    .then(r => r.json())
+    .then(({ state }) => {
+      if (state === 'ready') { setModelReady(); return; }
+      if (state === 'error') { setModelError(''); return; }
+      // Still loading — connect SSE
+      startModelLogStream();
+    });
+
+  function startModelLogStream() {
+    modelLog.style.display = 'block';
+    const es = new EventSource('/model-log');
+    es.onmessage = ev => {
+      const data = ev.data;
+      if (data.startsWith('__MODEL_STATE__')) {
+        es.close();
+        const state = data.split('__')[3];
+        if (state === 'ready') setModelReady();
+        else setModelError('');
+        return;
+      }
+      const d = document.createElement('div');
+      d.textContent = data;
+      modelLog.appendChild(d);
+      modelLog.scrollTop = modelLog.scrollHeight;
+    };
+    es.onerror = () => es.close();
+  }
+
+  // ── Form submit ───────────────────────────────────────────────────────────
   document.getElementById('tts-form').addEventListener('submit', async e => {
     e.preventDefault();
 
-    const btn       = document.getElementById('submit-btn');
-    const card      = document.getElementById('progress-card');
-    const log       = document.getElementById('log');
-    const dlBtn     = document.getElementById('download-btn');
-    const cancelBtn = document.getElementById('cancel-btn');
+    const btn        = document.getElementById('submit-btn');
+    const card       = document.getElementById('progress-card');
+    const log        = document.getElementById('log');
+    const dlBtn      = document.getElementById('download-btn');
+    const cancelBtn  = document.getElementById('cancel-btn');
+    const progressBar   = document.getElementById('progress-bar');
+    const progressWrap  = document.getElementById('progress-bar-wrap');
+    const progressLabel = document.getElementById('progress-label');
 
     btn.disabled = true;
     btn.textContent = 'Synthesizing…';
@@ -310,10 +416,6 @@
     log.innerHTML = '';
     dlBtn.style.display = 'none';
     cancelBtn.style.display = 'block';
-
-    const progressBar   = document.getElementById('progress-bar');
-    const progressWrap  = document.getElementById('progress-bar-wrap');
-    const progressLabel = document.getElementById('progress-label');
     progressBar.style.width = '0%';
     progressWrap.style.display = 'none';
     progressLabel.style.display = 'none';
@@ -376,7 +478,8 @@
                 : data.startsWith('❌') ? 'err'
                 : data.startsWith('🛑') ? 'warn'
                 : data.startsWith('⏱') ? 'warn'
-                : data.startsWith('🚀') || data.startsWith('📝') || data.startsWith('🔗') ? 'info'
+                : data.startsWith('🚀') || data.startsWith('📝') ||
+                  data.startsWith('🔗') || data.startsWith('⏳') ? 'info'
                 : '';
       appendLog(data, cls);
     };
