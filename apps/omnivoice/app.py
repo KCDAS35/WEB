@@ -50,6 +50,19 @@ def chunk_text(text: str, max_words: int = 400) -> list[str]:
 
 # ── Synthesis worker (runs in a thread) ─────────────────────────────────────
 
+def _stream_stderr(pipe, log_fn):
+    """Forward stderr lines from a subprocess into the job log."""
+    try:
+        for raw in iter(pipe.readline, ""):
+            line = raw.strip()
+            if line:
+                log_fn(f"  {line}")
+    except Exception:
+        pass
+    finally:
+        pipe.close()
+
+
 def run_synthesis(
     job_id: str,
     text: str,
@@ -90,17 +103,31 @@ def run_synthesis(
 
             t0 = time.monotonic()
             try:
-                proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+                proc = subprocess.Popen(
+                    cmd,
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.PIPE,
+                    text=True,
+                    bufsize=1,
+                    encoding="utf-8",
+                    errors="replace",
+                )
                 job["proc"] = proc
+                t_err = threading.Thread(
+                    target=_stream_stderr, args=(proc.stderr, log), daemon=True
+                )
+                t_err.start()
                 try:
-                    stdout, stderr = proc.communicate(timeout=300)
+                    proc.wait(timeout=300)
                 except subprocess.TimeoutExpired:
                     proc.kill()
                     proc.wait()
+                    t_err.join(timeout=2)
                     elapsed = time.monotonic() - t0
                     log(f"⏱️  Chunk {i + 1} timed out after {elapsed:.0f}s — skipping.")
                     continue
                 finally:
+                    t_err.join(timeout=2)
                     job.pop("proc", None)
             except Exception as exc:
                 log(f"⚠️  Chunk {i + 1} error: {exc}")
@@ -108,7 +135,7 @@ def run_synthesis(
 
             elapsed = time.monotonic() - t0
             if proc.returncode != 0:
-                log(f"⚠️  Chunk {i + 1} failed ({elapsed:.0f}s) — {stderr[:200]}")
+                log(f"⚠️  Chunk {i + 1} failed ({elapsed:.0f}s)")
             else:
                 log(f"✅ Chunk {i + 1} done ({elapsed:.0f}s)")
                 wav_files.append(out)
