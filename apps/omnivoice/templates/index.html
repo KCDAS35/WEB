@@ -168,6 +168,22 @@
     }
     #download-btn:hover { opacity: 0.88; }
 
+    #cancel-btn {
+      display: none;
+      width: 100%;
+      padding: 0.85rem;
+      background: #7f1d1d;
+      border: 1px solid #991b1b;
+      border-radius: 10px;
+      color: #fca5a5;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 0.75rem;
+      transition: opacity 0.2s;
+    }
+    #cancel-btn:hover { opacity: 0.85; }
+
     .word-count {
       font-size: 0.78rem;
       color: #4a5568;
@@ -235,6 +251,7 @@
   <h2>Progress</h2>
   <div id="log"></div>
   <button id="download-btn">⬇ Download Audio</button>
+  <button id="cancel-btn">✕ Cancel Synthesis</button>
 </div>
 
 <script>
@@ -256,22 +273,38 @@
   document.getElementById('tts-form').addEventListener('submit', async e => {
     e.preventDefault();
 
-    const btn  = document.getElementById('submit-btn');
-    const card = document.getElementById('progress-card');
-    const log  = document.getElementById('log');
-    const dlBtn = document.getElementById('download-btn');
+    const btn       = document.getElementById('submit-btn');
+    const card      = document.getElementById('progress-card');
+    const log       = document.getElementById('log');
+    const dlBtn     = document.getElementById('download-btn');
+    const cancelBtn = document.getElementById('cancel-btn');
 
     btn.disabled = true;
     btn.textContent = 'Synthesizing…';
     card.style.display = 'block';
     log.innerHTML = '';
     dlBtn.style.display = 'none';
+    cancelBtn.style.display = 'block';
 
     const fd = new FormData(e.target);
     const res = await fetch('/synthesize', { method: 'POST', body: fd });
     const { job_id } = await res.json();
 
     appendLog(`🚀 Job started (ID: ${job_id})`, 'info');
+
+    cancelBtn.onclick = async () => {
+      cancelBtn.disabled = true;
+      cancelBtn.textContent = 'Cancelling…';
+      await fetch(`/cancel/${job_id}`, { method: 'POST' });
+    };
+
+    function finishUI() {
+      btn.disabled = false;
+      btn.textContent = 'Synthesize';
+      cancelBtn.style.display = 'none';
+      cancelBtn.disabled = false;
+      cancelBtn.textContent = '✕ Cancel Synthesis';
+    }
 
     const es = new EventSource(`/progress/${job_id}`);
     es.onmessage = ev => {
@@ -285,17 +318,20 @@
           appendLog('🎉 Synthesis complete!', 'ok');
           dlBtn.style.display = 'block';
           dlBtn.onclick = () => { window.location = `/download/${job_id}`; };
+        } else if (status === 'cancelled') {
+          appendLog('🛑 Synthesis cancelled.', 'warn');
         } else {
           appendLog('❌ Synthesis failed — see errors above.', 'err');
         }
-        btn.disabled = false;
-        btn.textContent = 'Synthesize';
+        finishUI();
         return;
       }
 
       const cls = data.startsWith('✅') ? 'ok'
                 : data.startsWith('⚠')  ? 'warn'
                 : data.startsWith('❌') ? 'err'
+                : data.startsWith('🛑') ? 'warn'
+                : data.startsWith('⏱') ? 'warn'
                 : data.startsWith('🚀') || data.startsWith('📝') || data.startsWith('🔗') ? 'info'
                 : '';
       appendLog(data, cls);
@@ -304,8 +340,7 @@
     es.onerror = () => {
       appendLog('⚠️  Connection lost — synthesis may still be running.', 'warn');
       es.close();
-      btn.disabled = false;
-      btn.textContent = 'Synthesize';
+      finishUI();
     };
   });
 

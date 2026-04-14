@@ -8,6 +8,7 @@ import os
 import re
 import subprocess
 import threading
+import time
 import uuid
 import webbrowser
 from pathlib import Path
@@ -68,6 +69,11 @@ def run_synthesis(
 
         wav_files: list[Path] = []
         for i, chunk in enumerate(chunks):
+            if job.get("cancelled"):
+                log("🛑 Cancelled by user.")
+                job["status"] = "cancelled"
+                return
+
             out = OUTPUT_DIR / f"_chunk_{job_id}_{i:04d}.wav"
             log(f"[{i + 1}/{len(chunks)}] Synthesizing {len(chunk.split())} words...")
 
@@ -82,11 +88,29 @@ def run_synthesis(
             if instruct:
                 cmd += ["--instruct", instruct]
 
-            result = subprocess.run(cmd, capture_output=True, text=True)
-            if result.returncode != 0:
-                log(f"⚠️  Chunk {i + 1} failed — {result.stderr[:200]}")
+            t0 = time.monotonic()
+            try:
+                proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+                job["proc"] = proc
+                try:
+                    stdout, stderr = proc.communicate(timeout=300)
+                except subprocess.TimeoutExpired:
+                    proc.kill()
+                    proc.wait()
+                    elapsed = time.monotonic() - t0
+                    log(f"⏱️  Chunk {i + 1} timed out after {elapsed:.0f}s — skipping.")
+                    continue
+                finally:
+                    job.pop("proc", None)
+            except Exception as exc:
+                log(f"⚠️  Chunk {i + 1} error: {exc}")
+                continue
+
+            elapsed = time.monotonic() - t0
+            if proc.returncode != 0:
+                log(f"⚠️  Chunk {i + 1} failed ({elapsed:.0f}s) — {stderr[:200]}")
             else:
-                log(f"✅ Chunk {i + 1} done")
+                log(f"✅ Chunk {i + 1} done ({elapsed:.0f}s)")
                 wav_files.append(out)
 
         if not wav_files:
@@ -177,6 +201,21 @@ async def progress(job_id: str):
             await asyncio.sleep(0.4)
 
     return StreamingResponse(stream(), media_type="text/event-stream")
+
+
+@app.post("/cancel/{job_id}")
+def cancel_job(job_id: str):
+    job = JOBS.get(job_id)
+    if not job:
+        return {"error": "Job not found"}
+    job["cancelled"] = True
+    proc = job.get("proc")
+    if proc:
+        try:
+            proc.kill()
+        except Exception:
+            pass
+    return {"ok": True}
 
 
 @app.get("/download/{job_id}")
