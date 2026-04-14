@@ -339,6 +339,42 @@
       </a>
     </div>
 
+    <!-- OmniVoice-TTS -->
+    <div class="card">
+      <div class="card-icon">🎭</div>
+      <div>
+        <div class="card-title">OmniVoice-TTS</div>
+        <div class="card-subtitle">Voice cloning &bull; AI-Quest &bull; ~4 GB model</div>
+      </div>
+      <div style="display:flex;gap:0.4rem;flex-wrap:wrap;">
+        <span class="badge badge-purple">Voice Clone</span>
+        <span class="badge badge-blue">Google Colab</span>
+        <span class="badge badge-yellow">T4 GPU</span>
+        <span class="badge badge-green">Gradio UI</span>
+      </div>
+      <p class="card-desc">
+        Zero-shot voice cloning from <strong>3-second samples</strong>. Cross-lingual TTS (English voice → Spanish speech),
+        emotional tags <code style="font-size:0.78rem;background:#111827;border:1px solid #374151;border-radius:4px;padding:0.1rem 0.35rem;color:#93c5fd;">[laughter]</code>
+        <code style="font-size:0.78rem;background:#111827;border:1px solid #374151;border-radius:4px;padding:0.1rem 0.35rem;color:#93c5fd;">[sigh]</code>
+        <code style="font-size:0.78rem;background:#111827;border:1px solid #374151;border-radius:4px;padding:0.1rem 0.35rem;color:#93c5fd;">[gasps]</code>,
+        advanced inference controls, and experimental Voice Design dropdowns.
+      </p>
+      <hr class="divider" />
+      <p style="font-size:0.78rem;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.06em;">How to launch</p>
+      <ol class="steps">
+        <li>Click "Open in Colab" &rarr; set runtime to <strong>T4 GPU</strong>.</li>
+        <li>Run GPU check cell, then install dependencies.</li>
+        <li>Run model download cell (~4 GB, takes 2&ndash;3 min).</li>
+        <li>Run Gradio launch cell &rarr; a public <code>trycloudflare.com</code> URL appears.</li>
+        <li>Use <strong>Auto</strong> language setting for best cross-lingual results.</li>
+      </ol>
+      <a class="launch-btn btn-colab"
+         href="https://colab.research.google.com/github/KCDAS35/WEB/blob/main/demo/omnivoice_colab.ipynb"
+         target="_blank" rel="noopener">
+        ▶ Open in Colab
+      </a>
+    </div>
+
     <!-- Fish-Speech -->
     <div class="card">
       <div class="card-icon">🐟</div>
@@ -423,6 +459,38 @@
         <li>Add more GPU workers horizontally to scale past 50 users.</li>
       </ol>
       <div class="user-range">Capacity: <span>10&ndash;50 users</span> on a single GPU worker</div>
+    </div>
+
+    <!-- Buzz Transcription -->
+    <div class="card">
+      <div class="card-icon">🐝</div>
+      <div>
+        <div class="card-title">Buzz</div>
+        <div class="card-subtitle">Audio transcription &bull; OpenAI Whisper &bull; Offline</div>
+      </div>
+      <div style="display:flex;gap:0.4rem;flex-wrap:wrap;">
+        <span class="badge badge-green">Runs Locally</span>
+        <span class="badge badge-blue">Windows / Mac / Linux</span>
+        <span class="badge badge-purple">Whisper</span>
+      </div>
+      <p class="card-desc">
+        Transcribe any audio or microphone input to text using <strong>OpenAI Whisper</strong> — fully offline, no API key needed.
+        Supports 90+ languages. Perfect for transcribing client calls, meetings, or creating subtitles.
+      </p>
+      <hr class="divider" />
+      <p style="font-size:0.78rem;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.06em;">How to install</p>
+      <ol class="steps">
+        <li>Go to the GitHub releases page and download the installer for your OS.</li>
+        <li>Run the installer &mdash; no Python or GPU required for CPU mode.</li>
+        <li>Open Buzz &rarr; choose a Whisper model size (Small = fast, Large = accurate).</li>
+        <li>Record live audio or load an audio/video file to transcribe.</li>
+        <li>Export transcript as <code>.txt</code>, <code>.srt</code> (subtitles), or <code>.vtt</code>.</li>
+      </ol>
+      <a class="launch-btn btn-github"
+         href="https://github.com/chidiwilliams/buzz/releases"
+         target="_blank" rel="noopener">
+        &#11015; Download Buzz
+      </a>
     </div>
 
   </div>
