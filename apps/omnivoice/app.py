@@ -113,6 +113,8 @@ def run_synthesis(
                 log(f"✅ Chunk {i + 1} done ({elapsed:.0f}s)")
                 wav_files.append(out)
 
+            log(f"__PROGRESS__{i + 1}__{len(chunks)}__")
+
         if not wav_files:
             log("❌ Nothing synthesized — check errors above.")
             job["status"] = "failed"

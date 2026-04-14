@@ -136,6 +136,29 @@
 
     #progress-card { display: none; }
 
+    #progress-bar-wrap {
+      background: #0a0c14;
+      border-radius: 6px;
+      height: 10px;
+      margin-bottom: 0.4rem;
+      overflow: hidden;
+      display: none;
+    }
+    #progress-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #7c3aed, #2563eb);
+      border-radius: 6px;
+      transition: width 0.5s ease;
+    }
+    #progress-label {
+      font-size: 0.8rem;
+      color: #7c86a2;
+      text-align: right;
+      margin-bottom: 0.6rem;
+      display: none;
+    }
+
     #log {
       background: #0a0c14;
       border-radius: 8px;
@@ -249,6 +272,8 @@
 <!-- Progress -->
 <div class="card" id="progress-card" style="margin-top:1.25rem;max-width:800px;width:100%">
   <h2>Progress</h2>
+  <div id="progress-label"></div>
+  <div id="progress-bar-wrap"><div id="progress-bar"></div></div>
   <div id="log"></div>
   <button id="download-btn">⬇ Download Audio</button>
   <button id="cancel-btn">✕ Cancel Synthesis</button>
@@ -286,6 +311,13 @@
     dlBtn.style.display = 'none';
     cancelBtn.style.display = 'block';
 
+    const progressBar   = document.getElementById('progress-bar');
+    const progressWrap  = document.getElementById('progress-bar-wrap');
+    const progressLabel = document.getElementById('progress-label');
+    progressBar.style.width = '0%';
+    progressWrap.style.display = 'none';
+    progressLabel.style.display = 'none';
+
     const fd = new FormData(e.target);
     const res = await fetch('/synthesize', { method: 'POST', body: fd });
     const { job_id } = await res.json();
@@ -309,6 +341,18 @@
     const es = new EventSource(`/progress/${job_id}`);
     es.onmessage = ev => {
       const data = ev.data;
+
+      if (data.startsWith('__PROGRESS__')) {
+        const parts = data.split('__').filter(p => p);
+        const current = parseInt(parts[1]);
+        const total   = parseInt(parts[2]);
+        const pct     = Math.round((current / total) * 100);
+        progressBar.style.width = pct + '%';
+        progressLabel.textContent = `Chunk ${current} of ${total} — ${pct}% complete`;
+        progressWrap.style.display = 'block';
+        progressLabel.style.display = 'block';
+        return;
+      }
 
       if (data.startsWith('__STATUS__')) {
         es.close();
