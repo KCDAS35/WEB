@@ -344,13 +344,13 @@
       <div class="card-icon">🎭</div>
       <div>
         <div class="card-title">OmniVoice-TTS</div>
-        <div class="card-subtitle">Voice cloning &bull; AI-Quest &bull; ~4 GB model</div>
+        <div class="card-subtitle">Voice cloning &bull; local app + Colab relay &bull; ~4 GB model</div>
       </div>
       <div style="display:flex;gap:0.4rem;flex-wrap:wrap;">
         <span class="badge badge-purple">Voice Clone</span>
+        <span class="badge badge-green">Local App</span>
         <span class="badge badge-blue">Google Colab</span>
         <span class="badge badge-yellow">T4 GPU</span>
-        <span class="badge badge-green">Gradio UI</span>
       </div>
       <p class="card-desc">
         Zero-shot voice cloning from <strong>3-second samples</strong>. Cross-lingual TTS (English voice → Spanish speech),
@@ -360,13 +360,18 @@
         advanced inference controls, and experimental Voice Design dropdowns.
       </p>
       <hr class="divider" />
-      <p style="font-size:0.78rem;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.06em;">How to launch</p>
+      <p style="font-size:0.78rem;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.06em;">Local app (Windows &amp; Linux)</p>
+      <ol class="steps">
+        <li>Windows: run <code>apps\omnivoice\install.bat</code> once, then <code>start.bat</code>.</li>
+        <li>Linux: run <code>apps/omnivoice/install.sh</code> once, then <code>./start.sh</code>.</li>
+        <li>Open <code>http://localhost:8765</code> — default backend keeps the model loaded in memory (no per-chunk reload).</li>
+        <li>For GPU speed, flip backend to <strong>Remote — Colab relay</strong> and paste the URL from Step 5 of the Colab notebook.</li>
+      </ol>
+      <p style="font-size:0.78rem;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.06em;margin-top:0.6rem;">Colab (Gradio UI or relay for local app)</p>
       <ol class="steps">
         <li>Click "Open in Colab" &rarr; set runtime to <strong>T4 GPU</strong>.</li>
-        <li>Run GPU check cell, then install dependencies.</li>
-        <li>Run model download cell (~4 GB, takes 2&ndash;3 min).</li>
-        <li>Run Gradio launch cell &rarr; a public <code>trycloudflare.com</code> URL appears.</li>
-        <li>Use <strong>Auto</strong> language setting for best cross-lingual results.</li>
+        <li>Run Step 1 &rarr; Step 2 (install).</li>
+        <li>Run <strong>Step 3</strong> for the full Gradio UI, <em>or</em> <strong>Step 5</strong> to serve as a relay for the local app. Do not run both.</li>
       </ol>
       <a class="launch-btn btn-colab"
          href="https://colab.research.google.com/github/KCDAS35/WEB/blob/main/demo/omnivoice_colab.ipynb"
