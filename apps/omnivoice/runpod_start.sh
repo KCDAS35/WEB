@@ -38,13 +38,11 @@ python -m pip install --upgrade \
     --index-url https://download.pytorch.org/whl/cu124
 
 # omnivoice 0.1.4 imports HiggsAudioV2TokenizerModel from transformers.
-# That class was added around transformers 4.57 and reorganized/removed
-# in the 5.x line, so pin to the last 4.x release that still ships it.
-# transformers 4.57 also requires huggingface-hub < 1.0, whereas the
-# RunPod base ships 1.11 — downgrade hub in lockstep.
-echo "[runpod] pinning transformers==4.57.1 and huggingface-hub<1.0"
-python -m pip install --force-reinstall --no-deps \
-    "transformers==4.57.1" "huggingface-hub>=0.34,<1.0"
+# That class only exists in transformers 5.x, which is also what the
+# RunPod base image ships. Keep the 5.x line and let the torch upgrade
+# above handle the torch.nn.attention dependency.
+echo "[runpod] ensuring transformers 5.x (for HiggsAudioV2TokenizerModel)"
+python -m pip install --upgrade "transformers>=5.5" "huggingface-hub>=1.5"
 
 python -m pip install -r requirements.txt
 
