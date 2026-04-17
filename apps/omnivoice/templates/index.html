@@ -219,7 +219,28 @@
   <!-- Settings -->
   <div class="card">
     <h2>Settings</h2>
-    <label for="max_words">Words per chunk
+
+    <label for="backend">Synthesis backend</label>
+    <select id="backend" name="backend"
+      style="width:100%;background:#0f1117;border:1px solid #2d3148;border-radius:8px;
+             color:#e2e8f0;font-family:inherit;font-size:0.95rem;padding:0.75rem 1rem;">
+      <option value="local_persistent" selected>Local — persistent model (fast, keeps model loaded)</option>
+      <option value="remote">Remote — Colab relay (fastest, needs GPU URL)</option>
+      <option value="local_cli">Local — CLI per chunk (slow, reloads model each chunk)</option>
+    </select>
+    <div class="hint">
+      First run on <b>Local persistent</b> loads the model once, then every chunk is fast.
+      Use <b>Remote</b> when you have a Colab session running the relay cell.
+    </div>
+
+    <div id="remote-field" style="display:none;margin-top:1rem">
+      <label for="remote_url">Colab relay URL</label>
+      <input type="text" id="remote_url" name="remote_url"
+        placeholder="https://xxxxx.trycloudflare.com" />
+      <div class="hint">Paste the URL printed by the Colab relay cell (Step 5 in the notebook).</div>
+    </div>
+
+    <label for="max_words" style="margin-top:1rem">Words per chunk
       <em style="font-style:normal;color:#4a5568"> — lower = safer on less VRAM</em>
     </label>
     <input type="number" id="max_words" name="max_words" value="400" min="50" max="1000" />
@@ -251,6 +272,15 @@
     const name = e.target.files[0]?.name || '';
     document.getElementById('filename').textContent = name;
   });
+
+  // Show remote-URL field only when backend = remote
+  const backendSel = document.getElementById('backend');
+  const remoteField = document.getElementById('remote-field');
+  const toggleRemote = () => {
+    remoteField.style.display = backendSel.value === 'remote' ? 'block' : 'none';
+  };
+  backendSel.addEventListener('change', toggleRemote);
+  toggleRemote();
 
   // Form submit
   document.getElementById('tts-form').addEventListener('submit', async e => {
@@ -296,7 +326,9 @@
       const cls = data.startsWith('✅') ? 'ok'
                 : data.startsWith('⚠')  ? 'warn'
                 : data.startsWith('❌') ? 'err'
-                : data.startsWith('🚀') || data.startsWith('📝') || data.startsWith('🔗') ? 'info'
+                : data.startsWith('🚀') || data.startsWith('📝') || data.startsWith('🔗')
+                    || data.startsWith('🔧') || data.startsWith('🌐')
+                    || data.startsWith('⏳') || data.startsWith('↩') ? 'info'
                 : '';
       appendLog(data, cls);
     };
