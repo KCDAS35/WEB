@@ -79,19 +79,42 @@ def _synth_python(model, text: str, ref_audio: Optional[str],
         if fn is None:
             continue
         try:
-            fn(**kwargs, output=out_path)
-        except TypeError:
             result = fn(**kwargs)
-            if isinstance(result, tuple) and len(result) == 2:
-                audio, sr = result
+        except TypeError:
+            continue
+
+        # Strategy 1: the method may have written the file itself when
+        # given output=... Some APIs accept and honour that kwarg. Accept
+        # the file only if it exists and is non-empty.
+        if os.path.exists(out_path) and os.path.getsize(out_path) > 44:
+            return
+
+        # Strategy 2: unpack the return value into a WAV ourselves.
+        if isinstance(result, tuple) and len(result) == 2:
+            audio, sr = result
+            sf.write(out_path, np.asarray(audio), int(sr))
+            return
+        for sr_attr in ("sample_rate", "sampling_rate", "sr"):
+            if hasattr(result, "audio") and hasattr(result, sr_attr):
+                sf.write(out_path, np.asarray(result.audio),
+                         int(getattr(result, sr_attr)))
+                return
+        if isinstance(result, np.ndarray):
+            # Unknown sample rate — OmniVoice defaults to 24 kHz.
+            sf.write(out_path, result, 24000)
+            return
+        if isinstance(result, dict):
+            audio = result.get("audio") or result.get("waveform") or result.get("wav")
+            sr = (result.get("sample_rate") or result.get("sampling_rate")
+                  or result.get("sr") or 24000)
+            if audio is not None:
                 sf.write(out_path, np.asarray(audio), int(sr))
-            elif hasattr(result, "audio") and hasattr(result, "sample_rate"):
-                sf.write(out_path, np.asarray(result.audio), int(result.sample_rate))
-            else:
-                raise RuntimeError(
-                    f"Unknown return type from {method_name}: {type(result)}"
-                )
-        return
+                return
+
+        raise RuntimeError(
+            f"Unknown return type from {method_name}: {type(result).__name__} "
+            f"(repr={repr(result)[:200]})"
+        )
 
     raise RuntimeError("Loaded OmniVoice model exposes no known synth method.")
 
