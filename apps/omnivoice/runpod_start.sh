@@ -34,6 +34,12 @@ python -m pip install --upgrade \
     "torch>=2.5" "torchaudio>=2.5" \
     --index-url https://download.pytorch.org/whl/cu124
 
+# omnivoice 0.1.4 also imports HiggsAudioV2TokenizerModel, which was only
+# added to `transformers` around 4.56. The RunPod base image ships an older
+# transformers, so upgrade it before installing the app's requirements.
+echo "[runpod] ensuring transformers >= 4.56 for HiggsAudioV2TokenizerModel"
+python -m pip install --upgrade "transformers>=4.56"
+
 python -m pip install -r requirements.txt
 
 if [ "${TUNNEL:-}" = "cf" ]; then
