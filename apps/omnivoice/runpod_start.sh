@@ -25,6 +25,15 @@ else
 fi
 
 python -m pip install --upgrade pip -q
+
+# omnivoice 0.1.4 imports `torch.nn.attention`, which only exists in
+# PyTorch >= 2.5. RunPod's PyTorch 2.4.1 template is too old, so upgrade
+# torch/torchaudio against the CUDA 12.4 wheels before installing omnivoice.
+echo "[runpod] ensuring torch >= 2.5 (cu124) for omnivoice.torch.nn.attention import"
+python -m pip install --upgrade \
+    "torch>=2.5" "torchaudio>=2.5" \
+    --index-url https://download.pytorch.org/whl/cu124
+
 python -m pip install -r requirements.txt
 
 if [ "${TUNNEL:-}" = "cf" ]; then
