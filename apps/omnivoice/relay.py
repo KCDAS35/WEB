@@ -46,6 +46,8 @@ _API_ATTEMPTS = [
 def _load_model():
     """Return (model, 'python') if the Python API is importable, else
     (None, 'cli') so the relay falls back to the omnivoice-infer CLI."""
+    import traceback
+    failures: list[str] = []
     for mod_path, cls_name in _API_ATTEMPTS:
         try:
             mod = importlib.import_module(mod_path)
@@ -54,8 +56,13 @@ def _load_model():
             print(f"[relay] loaded via {mod_path}.{cls_name}")
             return model, "python"
         except Exception:
-            continue
+            failures.append(
+                f"--- {mod_path}.{cls_name} ---\n{traceback.format_exc()}"
+            )
     print("[relay] Python API not found — falling back to omnivoice-infer CLI")
+    print("[relay] reasons each attempt failed:")
+    for f in failures:
+        print(f)
     return None, "cli"
 
 
