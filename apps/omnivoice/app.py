@@ -174,21 +174,23 @@ def _synth_cli(chunk: str, ref: Optional[Path], instruct: Optional[str],
         cmd += ["--instruct", instruct]
     result = subprocess.run(cmd, capture_output=True, text=True)
     if result.returncode != 0:
-        return False, result.stderr[:300]
+        return False, (result.stderr or result.stdout or "")[-1500:]
     return True, ""
 
 
 def _synth_persistent(synth, chunk: str, ref: Optional[Path],
                       instruct: Optional[str], out: Path) -> tuple[bool, str]:
+    import traceback
     try:
         synth(chunk, str(ref) if ref else None, instruct or None, str(out))
         return True, ""
-    except Exception as exc:
-        return False, str(exc)[:300]
+    except Exception:
+        return False, traceback.format_exc()[-1500:]
 
 
 def _synth_remote(url: str, chunk: str, ref: Optional[Path],
                   instruct: Optional[str], out: Path) -> tuple[bool, str]:
+    import traceback
     try:
         files = {}
         data = {"text": chunk}
@@ -200,11 +202,11 @@ def _synth_remote(url: str, chunk: str, ref: Optional[Path],
         endpoint = url.rstrip("/") + "/tts"
         r = requests.post(endpoint, data=data, files=files or None, timeout=600)
         if r.status_code != 200:
-            return False, f"HTTP {r.status_code}: {r.text[:200]}"
+            return False, f"HTTP {r.status_code}: {r.text[:800]}"
         out.write_bytes(r.content)
         return True, ""
-    except Exception as exc:
-        return False, str(exc)[:300]
+    except Exception:
+        return False, traceback.format_exc()[-1500:]
 
 
 # ── Synthesis worker (runs in a thread) ─────────────────────────────────────
