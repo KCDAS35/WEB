@@ -29,6 +29,11 @@ GPU_PREFERENCE = [
     "NVIDIA RTX 4090",
     "NVIDIA RTX A5000",
     "NVIDIA A100 80GB PCIe",
+    "NVIDIA A10G",
+    "NVIDIA GeForce RTX 3090",
+    "NVIDIA GeForce RTX 3090 Ti",
+    "NVIDIA L4",
+    "NVIDIA Tesla V100-SXM2-32GB",
 ]
 
 # This runs inside the pod at startup — installs + launches OmniVoice
@@ -60,30 +65,35 @@ print("=" * 55)
 
 print("\n[1/3] Finding an available GPU...")
 chosen_gpu, pod = None, None
-for gpu_id in GPU_PREFERENCE:
-    try:
-        print(f"   Trying {gpu_id}...", end=" ", flush=True)
-        pod = runpod.create_pod(
-            name="omnivoice-gpu",
-            image_name="runpod/pytorch:2.4.0-py3.11-cuda12.4.1-devel-ubuntu22.04",
-            gpu_type_id=gpu_id,
-            cloud_type="SECURE",
-            gpu_count=1,
-            volume_in_gb=50,
-            container_disk_in_gb=20,
-            ports="8888/http,8765/http,22/tcp",
-            volume_mount_path="/workspace",
-            docker_args=AUTO_INSTALL,
-        )
-        chosen_gpu = gpu_id
-        print("OK")
+for cloud_type in ["SECURE", "COMMUNITY"]:
+    if pod:
         break
-    except Exception as e:
-        print(f"unavailable")
-        continue
+    print(f"   Checking {cloud_type} cloud...")
+    for gpu_id in GPU_PREFERENCE:
+        try:
+            print(f"      {gpu_id}...", end=" ", flush=True)
+            pod = runpod.create_pod(
+                name="omnivoice-gpu",
+                image_name="runpod/pytorch:2.4.0-py3.11-cuda12.4.1-devel-ubuntu22.04",
+                gpu_type_id=gpu_id,
+                cloud_type=cloud_type,
+                gpu_count=1,
+                volume_in_gb=50,
+                container_disk_in_gb=20,
+                ports="8888/http,8765/http,22/tcp",
+                volume_mount_path="/workspace",
+                docker_args=AUTO_INSTALL,
+            )
+            chosen_gpu = f"{gpu_id} ({cloud_type})"
+            print("OK")
+            break
+        except Exception:
+            print("unavailable")
+            continue
 
 if not pod:
-    print("\nNo GPUs currently available. Try again in a few minutes.")
+    print("\nNo GPUs available on Secure or Community cloud right now.")
+    print("RunPod is often busy — wait 5 minutes and try again.")
     sys.exit(1)
 
 pod_id = pod["id"]
