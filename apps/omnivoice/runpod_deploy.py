@@ -1,32 +1,47 @@
 #!/usr/bin/env python3
 """
-OmniVoice RunPod Auto-Deploy
-Run from Alienware:  python3 runpod_deploy.py
+OmniVoice RunPod Auto-Deploy (Cross-platform: Windows / Linux / macOS)
 
-Deploys a GPU pod, installs OmniVoice, returns a clickable URL.
+Usage:
+  PowerShell:  $env:RUNPOD_API_KEY="rpa_..."; python runpod_deploy.py
+  Linux/Mac:   RUNPOD_API_KEY=rpa_... python3 runpod_deploy.py
+
+Creates a GPU pod with an auto-install command baked in.
+OmniVoice installs and starts automatically — no SSH needed.
 """
 import os
 import sys
 import time
-import json
 import subprocess
 
 API_KEY = os.environ.get("RUNPOD_API_KEY", "").strip()
-SSH_KEY = os.path.expanduser("~/.ssh/id_ed25519")
-
 if not API_KEY:
-    sys.exit("ERROR: set RUNPOD_API_KEY env var first.\n"
-             "  export RUNPOD_API_KEY=rpa_xxxxxxxxxxxx")
+    sys.exit(
+        "ERROR: Set RUNPOD_API_KEY first.\n"
+        "  PowerShell:  $env:RUNPOD_API_KEY='rpa_xxx'\n"
+        "  Bash:        export RUNPOD_API_KEY=rpa_xxx"
+    )
 
-# Preferred GPU order: cheapest-capable first
 GPU_PREFERENCE = [
-    "NVIDIA RTX A6000",      # 48GB, ~$0.49/hr
-    "NVIDIA A40",            # 48GB, ~$0.39/hr
-    "NVIDIA L40",            # 48GB
-    "NVIDIA RTX 4090",       # 24GB
-    "NVIDIA RTX A5000",      # 24GB
-    "NVIDIA A100 80GB PCIe", # 80GB, expensive
+    "NVIDIA RTX A6000",
+    "NVIDIA A40",
+    "NVIDIA L40",
+    "NVIDIA RTX 4090",
+    "NVIDIA RTX A5000",
+    "NVIDIA A100 80GB PCIe",
 ]
+
+# This runs inside the pod at startup — installs + launches OmniVoice
+AUTO_INSTALL = (
+    "bash -c 'export HF_HOME=/workspace/hf-cache TRANSFORMERS_CACHE=/workspace/hf-cache; "
+    "mkdir -p /workspace/hf-cache && cd /workspace && "
+    "(test -d WEB || git clone -b claude/fix-synthesis-performance-tp0Aq "
+    "https://github.com/KCDAS35/WEB.git WEB) && "
+    "cd WEB && git fetch && git checkout claude/fix-synthesis-performance-tp0Aq && git pull && "
+    "pip install -q fastapi \"uvicorn[standard]\" python-multipart soundfile numpy omnivoice && "
+    "cd apps/omnivoice && nohup python3 app.py > /workspace/omnivoice.log 2>&1 & "
+    "/start.sh'"
+)
 
 def ensure_sdk():
     try:
@@ -39,13 +54,12 @@ ensure_sdk()
 import runpod
 runpod.api_key = API_KEY
 
-print("━" * 50)
+print("=" * 55)
 print("  OmniVoice RunPod Auto-Deploy")
-print("━" * 50)
+print("=" * 55)
 
-print("\n[1/5] Finding available GPU...")
-chosen_gpu = None
-pod = None
+print("\n[1/3] Finding an available GPU...")
+chosen_gpu, pod = None, None
 for gpu_id in GPU_PREFERENCE:
     try:
         print(f"   Trying {gpu_id}...", end=" ", flush=True)
@@ -59,88 +73,49 @@ for gpu_id in GPU_PREFERENCE:
             container_disk_in_gb=20,
             ports="8888/http,8765/http,22/tcp",
             volume_mount_path="/workspace",
+            docker_args=AUTO_INSTALL,
         )
         chosen_gpu = gpu_id
         print("OK")
         break
     except Exception as e:
-        print(f"unavailable ({str(e)[:60]})")
+        print(f"unavailable")
         continue
 
 if not pod:
-    print("\nNo GPUs available right now. Try again in a few minutes.")
+    print("\nNo GPUs currently available. Try again in a few minutes.")
     sys.exit(1)
 
-print(f"\n[2/5] Pod created: {pod['id']} on {chosen_gpu}")
-print("      Waiting for it to boot...")
+pod_id = pod["id"]
+print(f"\n[2/3] Pod {pod_id} created on {chosen_gpu}")
+print("      Waiting for HTTP proxy (1-2 min)...")
 
-# Wait for pod to be ready (status RUNNING + has public IP/port)
-pod_info = None
-for i in range(60):  # up to 5 minutes
+# Wait for 8765 HTTP proxy to become routable
+for i in range(90):  # up to 7.5 min
     time.sleep(5)
-    pod_info = runpod.get_pod(pod["id"])
-    if pod_info.get("desiredStatus") == "RUNNING" and pod_info.get("runtime"):
-        ports = pod_info["runtime"].get("ports", [])
-        if any(p.get("privatePort") == 22 for p in ports):
-            break
-    print(f"   …still booting ({i*5}s)", end="\r", flush=True)
+    info = runpod.get_pod(pod_id)
+    if info.get("desiredStatus") == "RUNNING" and info.get("runtime"):
+        print(f"   Pod running. Install begins inside the container now.")
+        break
+    print(f"   ...still booting ({i*5}s)   ", end="\r", flush=True)
 
-print(f"\n[3/5] Pod is running")
+omnivoice_url = f"https://{pod_id}-8765.proxy.runpod.net"
+jupyter_url   = f"https://{pod_id}-8888.proxy.runpod.net"
+web_term_url  = f"https://www.runpod.io/console/pods/{pod_id}"
 
-# Extract SSH connection info
-ssh_port = None
-ssh_ip = None
-http_url_8765 = None
-for p in pod_info["runtime"]["ports"]:
-    if p.get("privatePort") == 22 and p.get("isIpPublic"):
-        ssh_ip = p["ip"]
-        ssh_port = p["publicPort"]
-    if p.get("privatePort") == 8765:
-        http_url_8765 = f"https://{pod['id']}-8765.proxy.runpod.net"
-
-if not ssh_ip:
-    print("SSH port not exposed yet. Pod ID:", pod["id"])
-    print("Use the RunPod web terminal and run the install script manually.")
-    sys.exit(1)
-
-print(f"      SSH: root@{ssh_ip}:{ssh_port}")
-
-print("\n[4/5] Running install script on the pod...")
-install_cmd = """
-set -e
-echo '>>> GPU check:'
-nvidia-smi --query-gpu=name,memory.total --format=csv,noheader
-echo '>>> Cloning repo:'
-rm -rf /workspace/WEB
-git clone -b claude/fix-synthesis-performance-tp0Aq https://github.com/KCDAS35/WEB.git /workspace/WEB
-echo '>>> Running installer:'
-bash /workspace/WEB/apps/omnivoice/install_runpod.sh
-echo '>>> Starting OmniVoice in background:'
-cd /workspace/WEB/apps/omnivoice
-nohup python3 app.py > /workspace/omnivoice.log 2>&1 &
-sleep 3
-echo '>>> All done. Log: /workspace/omnivoice.log'
-"""
-
-ssh_args = [
-    "ssh",
-    "-o", "StrictHostKeyChecking=no",
-    "-o", "UserKnownHostsFile=/dev/null",
-    "-i", SSH_KEY,
-    "-p", str(ssh_port),
-    f"root@{ssh_ip}",
-    install_cmd,
-]
-
-result = subprocess.run(ssh_args)
-if result.returncode != 0:
-    print(f"\nInstall returned exit code {result.returncode} — check the pod's web terminal.")
-
-print("\n[5/5] Done!")
-print("━" * 50)
-print(f"  Pod ID:    {pod['id']}")
-print(f"  GPU:       {chosen_gpu}")
-print(f"  OmniVoice: {http_url_8765}")
-print("━" * 50)
-print("\nModel will download ~4GB on first request. Watch the banner in the UI.")
-print("If the URL isn't ready yet, wait 30 seconds and refresh.")
+print("\n[3/3] Done!")
+print("=" * 55)
+print(f"  Pod ID:     {pod_id}")
+print(f"  GPU:        {chosen_gpu}")
+print()
+print(f"  OmniVoice:  {omnivoice_url}")
+print(f"  Dashboard:  {web_term_url}")
+print("=" * 55)
+print()
+print("The pod is auto-installing OmniVoice right now.")
+print("Give it 5-10 minutes for the first run (downloads ~4 GB model).")
+print(f"If the URL shows an error, wait and refresh.")
+print()
+print("To check install progress, go to the dashboard URL above,")
+print("open the Web Terminal, and run:")
+print("  tail -f /workspace/omnivoice.log")
