@@ -50,6 +50,10 @@ AUTO_INSTALL = (
     "from huggingface_hub import snapshot_download; "
     "snapshot_download(\\\"mistralai/Voxtral-4B-TTS-2603\\\", "
     "cache_dir=\\\"/workspace/hf-cache\\\")\" > /workspace/voxtral-download.log 2>&1 & "
+    "cd /workspace && (test -d fish-speech || "
+    "git clone https://github.com/fishaudio/fish-speech.git) && "
+    "cd fish-speech && nohup pip install -e . "
+    "> /workspace/fish-speech-install.log 2>&1 & "
     "/start.sh'"
 )
 
