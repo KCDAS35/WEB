@@ -36,15 +36,20 @@ GPU_PREFERENCE = [
     "NVIDIA Tesla V100-SXM2-32GB",
 ]
 
-# This runs inside the pod at startup — installs + launches OmniVoice
+# This runs inside the pod at startup — installs + launches OmniVoice AND Voxtral
 AUTO_INSTALL = (
     "bash -c 'export HF_HOME=/workspace/hf-cache TRANSFORMERS_CACHE=/workspace/hf-cache; "
     "mkdir -p /workspace/hf-cache && cd /workspace && "
     "(test -d WEB || git clone -b claude/fix-synthesis-performance-tp0Aq "
     "https://github.com/KCDAS35/WEB.git WEB) && "
     "cd WEB && git fetch && git checkout claude/fix-synthesis-performance-tp0Aq && git pull && "
-    "pip install -q fastapi \"uvicorn[standard]\" python-multipart soundfile numpy omnivoice && "
+    "pip install -q fastapi \"uvicorn[standard]\" python-multipart soundfile numpy "
+    "omnivoice transformers accelerate huggingface_hub && "
     "cd apps/omnivoice && nohup python3 app.py > /workspace/omnivoice.log 2>&1 & "
+    "nohup python3 -c \""
+    "from huggingface_hub import snapshot_download; "
+    "snapshot_download(\\\"mistralai/Voxtral-4B-TTS-2603\\\", "
+    "cache_dir=\\\"/workspace/hf-cache\\\")\" > /workspace/voxtral-download.log 2>&1 & "
     "/start.sh'"
 )
 
