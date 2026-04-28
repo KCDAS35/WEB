@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jagat Sampurna HQ — Mission Control</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', sans-serif; background: #0d0d1a; color: #e8e8f0; min-height: 100vh; }
+
+  header {
+    background: linear-gradient(135deg, #1a0a2e 0%, #2d1b4e 100%);
+    padding: 1.5rem 2rem;
+    display: flex; align-items: center; gap: 1rem;
+    border-bottom: 1px solid #4a2080;
+  }
+  header h1 { font-size: 1.4rem; font-weight: 600; }
+  header p  { font-size: 0.8rem; color: #a090c0; }
+  .om { font-size: 2rem; }
+
+  .status-bar {
+    background: #12122a;
+    padding: 0.5rem 2rem;
+    display: flex; gap: 2rem; font-size: 0.75rem; color: #8080a0;
+    border-bottom: 1px solid #1e1e3a;
+  }
+  .status-bar span { color: #60d060; }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 1rem;
+    padding: 2rem;
+  }
+
+  .tile {
+    background: #16163a;
+    border: 1px solid #2a2a50;
+    border-radius: 12px;
+    padding: 1.25rem;
+    cursor: pointer;
+    transition: transform 0.15s, border-color 0.15s;
+    position: relative;
+  }
+  .tile:hover { transform: translateY(-2px); border-color: #6040a0; }
+  .tile.green  { border-left: 4px solid #40c040; }
+  .tile.yellow { border-left: 4px solid #c0a000; }
+  .tile.red    { border-left: 4px solid #c02020; }
+
+  .tile-icon  { font-size: 1.8rem; margin-bottom: 0.5rem; }
+  .tile-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em; color: #8080a0; }
+  .tile-value { font-size: 2rem; font-weight: 700; color: #e0d0ff; }
+  .tile-sub   { font-size: 0.75rem; color: #7070a0; margin-top: 0.25rem; }
+
+  .alerts {
+    margin: 0 2rem;
+    background: #1a0a0a;
+    border: 1px solid #402020;
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+  }
+  .alerts h2 { font-size: 0.85rem; color: #ff6060; margin-bottom: 0.75rem; }
+  .alert-item { font-size: 0.8rem; padding: 0.35rem 0; border-bottom: 1px solid #2a1a1a; color: #e09090; }
+  .alert-item:last-child { border-bottom: none; }
+
+  .nav {
+    display: flex; flex-wrap: wrap; gap: 0.5rem;
+    padding: 1rem 2rem 0;
+  }
+  .nav button {
+    background: #20204a;
+    border: 1px solid #3a3a6a;
+    color: #b0a0d0;
+    padding: 0.4rem 0.9rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.75rem;
+    transition: background 0.15s;
+  }
+  .nav button:hover, .nav button.active {
+    background: #4a2880;
+    border-color: #7050b0;
+    color: #fff;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="om">ॐ</div>
+  <div>
+    <h1>Jagat Sampurna International Yogi Foundation</h1>
+    <p>HQ Mission Control — Foundation Operating System</p>
+  </div>
+</header>
+
+<div class="status-bar">
+  <div>System: <span id="sys-status">Online</span></div>
+  <div>Last refresh: <span id="last-refresh">—</span></div>
+  <div>API: <span id="api-url">http://localhost:8000</span></div>
+</div>
+
+<div class="nav">
+  <button class="active" onclick="showDashboard()">Dashboard</button>
+  <button onclick="goto('personnel')">Personnel</button>
+  <button onclick="goto('agents')">AI Agents</button>
+  <button onclick="goto('assets')">Assets</button>
+  <button onclick="goto('spaces')">Spaces</button>
+  <button onclick="goto('beings')">Living Beings</button>
+  <button onclick="goto('inventory')">Inventory</button>
+  <button onclick="goto('visitors')">Visitors</button>
+  <button onclick="goto('clients')">Clients</button>
+  <button onclick="goto('media')">Media</button>
+  <button onclick="goto('finance/accounts')">Finance</button>
+  <button onclick="goto('tasks')">Tasks</button>
+  <button onclick="goto('log')">Operations Log</button>
+</div>
+
+<div id="alerts-section" class="alerts" style="display:none; margin-top:1rem;">
+  <h2>⚠ Active Alerts</h2>
+  <div id="alerts-list"></div>
+</div>
+
+<div class="grid" id="dashboard-grid">
+  <div class="tile green">
+    <div class="tile-icon">👥</div>
+    <div class="tile-label">Active Personnel</div>
+    <div class="tile-value" id="val-personnel">—</div>
+    <div class="tile-sub">Click to manage</div>
+  </div>
+  <div class="tile green">
+    <div class="tile-icon">🤖</div>
+    <div class="tile-label">AI Agents Running</div>
+    <div class="tile-value" id="val-agents">—</div>
+    <div class="tile-sub">Click to manage</div>
+  </div>
+  <div class="tile green">
+    <div class="tile-icon">📦</div>
+    <div class="tile-label">Assets Needing Attention</div>
+    <div class="tile-value" id="val-assets">—</div>
+    <div class="tile-sub">Click to view</div>
+  </div>
+  <div class="tile green">
+    <div class="tile-icon">🥬</div>
+    <div class="tile-label">Low Stock Items</div>
+    <div class="tile-value" id="val-inventory">—</div>
+    <div class="tile-sub">Click to restock</div>
+  </div>
+  <div class="tile green">
+    <div class="tile-icon">🧑‍🤝‍🧑</div>
+    <div class="tile-label">Visitors Today</div>
+    <div class="tile-value" id="val-visitors">—</div>
+    <div class="tile-sub">Click to manage</div>
+  </div>
+  <div class="tile green">
+    <div class="tile-icon">✅</div>
+    <div class="tile-label">Overdue Tasks</div>
+    <div class="tile-value" id="val-tasks">—</div>
+    <div class="tile-sub">Click to action</div>
+  </div>
+  <div class="tile green">
+    <div class="tile-icon">💳</div>
+    <div class="tile-label">Renewals This Week</div>
+    <div class="tile-value" id="val-renewals">—</div>
+    <div class="tile-sub">Click to review</div>
+  </div>
+</div>
+
+<script>
+const API = "http://localhost:8000/api/v1";
+
+async function loadDashboard() {
+  try {
+    const res = await fetch(`${API}/dashboard`);
+    const json = await res.json();
+    const d = json.data;
+
+    document.getElementById("val-personnel").textContent = d.personnel_active ?? "—";
+    document.getElementById("val-agents").textContent    = d.agents_running ?? "—";
+    document.getElementById("val-assets").textContent    = d.assets_issues ?? "—";
+    document.getElementById("val-inventory").textContent = d.low_stock_items ?? "—";
+    document.getElementById("val-visitors").textContent  = d.visitors_today ?? "—";
+    document.getElementById("val-tasks").textContent     = d.tasks_overdue ?? "—";
+    document.getElementById("val-renewals").textContent  = d.renewals_soon ?? "—";
+
+    // Color tiles by alert level
+    colorTile("val-assets",    d.assets_issues    > 0);
+    colorTile("val-inventory", d.low_stock_items  > 0, true);
+    colorTile("val-tasks",     d.tasks_overdue    > 0, true);
+    colorTile("val-renewals",  d.renewals_soon    > 0);
+
+    // Alerts section
+    const alertsEl = document.getElementById("alerts-section");
+    const alertsList = document.getElementById("alerts-list");
+    if (d.alerts && d.alerts.length > 0) {
+      alertsList.innerHTML = d.alerts.map(a =>
+        `<div class="alert-item">[${a.module.toUpperCase()}] ${a.message}</div>`
+      ).join("");
+      alertsEl.style.display = "block";
+    } else {
+      alertsEl.style.display = "none";
+    }
+
+    document.getElementById("last-refresh").textContent = new Date().toLocaleTimeString();
+  } catch(e) {
+    document.getElementById("sys-status").textContent = "Offline";
+    document.getElementById("sys-status").style.color = "#ff4040";
+  }
+}
+
+function colorTile(valId, isAlert, isRed = false) {
+  const tile = document.getElementById(valId).closest(".tile");
+  tile.className = "tile " + (isAlert ? (isRed ? "red" : "yellow") : "green");
+}
+
+function goto(module) {
+  window.open(`${API}/${module}`, "_blank");
+}
+
+function showDashboard() {
+  loadDashboard();
+}
+
+loadDashboard();
+setInterval(loadDashboard, 60000);
+</script>
+</body>
+</html>
